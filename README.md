@@ -53,9 +53,47 @@ Perform one-hot conversion for negative controls, simultaneously generating exte
 ```bash
 python bed_to_onehot.py N1_OP_eccDNA.sort.bed Homo_sapiens_assembly38.fasta N1_eccDNA_onehotOP.npz
 ```
-### DNA SNV SV 5mC_5hmC 6mA:
-在这一步，需要提前准备好SNV的mutation_AF,详细步骤可以参考'SNV_AF_process', SV的vcf file, 5mC_5hmC和6mA pileup file.
+### DNA SNV, SV, 5mC_5hmC and 6mA:  
 
+At this step, the following input files need to be prepared in advance:    
+
+- SNV mutation allele frequency file `N1_mutation_AF` (detailed procedures can be found in `SNV_AF_process`)  
+- SV VCF file `N1_SV.vcf`  
+- 5mC/5hmC and 6mA pileup files `N1_pileup.bed.gz` and `N1_6mA_pileup.bed.gz`
+  
+DNA SNV:  
+```bash
+python SNVAF_to_input.py -b N1_eccDNA.sort_extended.bed -a N1_mutation_AF -o N1_SNP_AFoutput.npz
+```
+DNA SV:
+```bash
+python SV_to_onehot.py -b N1_eccDNA.sort_extended.bed -v N1_SV.vcf -o N1_extended_SV.npz
+```
+DNA 5mc_5hmc:
+```bash
+python DNA_5mc_5hmc.py N1_eccDNA.sort_extended.bed N1_pileup.bed.gz N1_5mc5hmc_output.npz
+```
+DNA 6mA:
+```bash
+python DNA_6mA.py -a N1_eccDNA.sort_extended.bed -b N1_6mA_pileup.bed.gz -o N1_6mA_output.npz
+```
+
+### RNA m6A TPM:
+At this step, the following input files need to be prepared in advance:  
+
+- RNA modification data `N1_RNA_mod`  
+- Transcript count matrix `N1_transcript_counts.tsv`  
+
+For TPM (Transcripts Per Million) normalization, please refer to the preparation script: `eccDNA_TPM.pbs`
+
+RNA m6A:  
+```bash
+python m6A_to_input.py -b N1_eccDNA.sort_extended.bed -a N1_RNA_mod -o N1_RNA_modoutput.npz  
+```
+RNA TPM:  
+```bash
+python RNA_TPM.py N1_eccDNA.sort_extended.bed N1_transcript_counts.tsv N1_eccDNA_TPM.npz
+```
 
 
 ## Step2: Data combine  
