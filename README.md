@@ -47,6 +47,7 @@ python bed_to_onehot.py N1_eccDNA.sort.bed Homo_sapiens_assembly38.fasta N1_eccD
 Generate negative control samples `N1_OPeccDNA.bed` by randomizing chromosomal coordinates:
 ```bash
 bedtools shuffle -i N1_eccDNA.sort.bed -g hg38.chrom.sizesrescaffold -excl N1_eccDNA.sort.bed > N1_OPeccDNA.bed
+
 bedtools sort -i N1_OPeccDNA.bed > N1_OP_eccDNA.sort.bed
 ```
 Perform one-hot conversion for negative controls, simultaneously generating extended ±100bp BED and FASTA files:
