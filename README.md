@@ -60,7 +60,7 @@ At this step, the following input files need to be prepared in advance:
 
 - SNV mutation allele frequency file `N1_mutation_AF` (detailed procedures can be found in `SNV_AF_process`)  
 - SV VCF file `N1_SV.vcf`  
-- 5mC/5hmC and 6mA pileup files `N1_pileup.bed.gz` and `N1_6mA_pileup.bed.gz`
+- 5mC/5hmC and 6mA pileup files `N1_pileupALL.bed.gz` and `N1_6mA_pileup.bed.gz`
   
 DNA SNV:  
 ```bash
@@ -72,7 +72,7 @@ python SV_to_onehot.py -b N1_eccDNA.sort_extended.bed -v N1_SV.vcf -o N1_extende
 ```
 DNA 5mc_5hmc:
 ```bash
-python DNA_5mc_5hmc.py N1_eccDNA.sort_extended.bed N1_pileup.bed.gz N1_5mc5hmc_output.npz
+python DNA_5mc_5hmc.py N1_eccDNA.sort_extended.bed N1_pileupALL.bed.gz N1_5mc5hmc_output.npz
 ```
 DNA 6mA:
 ```bash
