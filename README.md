@@ -2,7 +2,7 @@
 
 ## Installation  
 
-You can install just the base python(3.8) packages, include: 
+You can install just the base python(v3.8) packages, include: 
 - numpy
 - pandas
 - scipy
