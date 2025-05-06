@@ -54,8 +54,8 @@ Perform one-hot conversion for negative controls, simultaneously generating exte
 python bed_to_onehot.py N1_OP_eccDNA.sort.bed Homo_sapiens_assembly38.fasta N1_eccDNA_onehotOP.npz
 ```
 ### DNA SNV SV 5mC_5hmC 6mA:
-在这一步，需要提前准备好SNV的mutation_AF, SV的vcf file, 5mC_5hmC和6mA pileup file.
-mutation_AF
+在这一步，需要提前准备好SNV的mutation_AF,详细步骤可以参考'SNV_AF_process', SV的vcf file, 5mC_5hmC和6mA pileup file.
+
 
 
 ## Step2: Data combine  
