@@ -99,31 +99,31 @@ python RNA_TPM.py N1_eccDNA.sort_extended.bed N1_transcript_counts.tsv N1_eccDNA
 
 ## Step2: Data combine  
 After Step1, we obtained multiple npz files, for multiple samples, we need to combine them into one npz files.
-DNA sequence One-hot:  
+### DNA sequence One-hot:  
 ```bash  
 python eccDNA_onehot_npz_process.py -i N1_eccDNA_onehot.npz N2_eccDNA_onehot.npz N3_eccDNA_onehot.npz N4_eccDNA_onehot.npz N5_eccDNA_onehot.npz -o N1-N5_eccDNA_onehot_merged_arrays.npz  
 ```  
-DNA SNV:  
+### DNA SNV:  
 ```bash  
 python eccDNA_SNP_AFoutput.py -i N1_SNP_AFoutput.npz N2_SNP_AFoutput.npz N3_SNP_AFoutput.npz N4_SNP_AFoutput.npz N5_SNP_AFoutput.npz -o N1-N5_SNP_AFoutput.npz  
 ```  
-DNA SV:  
+### DNA SV:  
 ```bash  
 python eccDNA_extended_SV.py -i N1_extended_SV.npz N2_extended_SV.npz N3_extended_SV.npz N4_extended_SV.npz N5_extended_SV.npz -o N1-N5_extended_SV.npz  
 ```  
-DNA 5mc_5hmc:  
+### DNA 5mc_5hmc:  
 ```bash  
 python eccDNA_5mc5hmc_output.py -i N1_5mc5hmc_output.npz N2_5mc5hmc_output.npz N3_5mc5hmc_output.npz N4_5mc5hmc_output.npz N5_5mc5hmc_output.npz -o N1-N5_eccDNA_5mc5hmc_output.npz  
 ```  
-DNA 6mA:  
+### DNA 6mA:  
 ```bash  
 python eccDNA_6mA_output.py -i N1_6mA_output.npz N2_6mA_output.npz N3_6mA_output.npz N4_6mA_output.npz N5_6mA_output.npz -o N1-N5_6mA_output.npz  
 ```  
-RNA m6A:  
+### RNA m6A:  
 ```bash  
 python eccDNA_RNA_modoutput.py -i N1_RNA_modoutput.npz N2_RNA_modoutput.npz N3_RNA_modoutput.npz N4_RNA_modoutput.npz N5_RNA_modoutput.npz -o N1-N5_RNA_modoutput.npz  
 ```  
-RNA TPM:   
+### RNA TPM:   
 ```bash  
 python eccDNA_TPM.py -i N1_eccDNA_TPM.npz N2_eccDNA_TPM.npz N3_eccDNA_TPM.npz N4_eccDNA_TPM.npz N5_eccDNA_TPM.npz -o N1-N5_eccDNA_TPM.npz  
 ```
