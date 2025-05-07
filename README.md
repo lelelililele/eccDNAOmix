@@ -98,7 +98,7 @@ python RNA_TPM.py N1_eccDNA.sort_extended.bed N1_transcript_counts.tsv N1_eccDNA
 
 
 ## Step2: Data combination    
-After Step1, we obtained multiple npz files, for multiple samples, we need to combine them into one npz files.
+After Step1, we obtained multiple npz files for multiple samples, we need to combine them into one npz files.
 ### DNA sequence One-hot:  
 ```bash  
 python eccDNA_onehot_npz_process.py -i N1_eccDNA_onehot.npz N2_eccDNA_onehot.npz N3_eccDNA_onehot.npz N4_eccDNA_onehot.npz N5_eccDNA_onehot.npz -o N1-N5_eccDNA_onehot_merged_arrays.npz  
