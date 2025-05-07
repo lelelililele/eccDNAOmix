@@ -36,7 +36,7 @@ pip install numpy==1.24.3 pandas==2.0.3 scipy==1.10.1 biopython==1.83 scikit-lea
 The software [bedtools](https://bedtools.readthedocs.io/en/latest/index.html) and [human hg38 reference fasta](https://github.com/broadinstitute/gatk/blob/master/src/test/resources/large/Homo_sapiens_assembly38.fasta.gz) were also needed.   
 
 
-## Step1: Data process  
+## Step1: Data preparation  
 In this step, we require an example file 'N1_eccDNA.sort.bed' to demonstrate the analysis pipeline. 
 
 ### DNA sequence One-hot:
@@ -97,7 +97,7 @@ python RNA_TPM.py N1_eccDNA.sort_extended.bed N1_transcript_counts.tsv N1_eccDNA
 ```
 
 
-## Step2: Data combine  
+## Step2: Data combination    
 After Step1, we obtained multiple npz files, for multiple samples, we need to combine them into one npz files.
 ### DNA sequence One-hot:  
 ```bash  
