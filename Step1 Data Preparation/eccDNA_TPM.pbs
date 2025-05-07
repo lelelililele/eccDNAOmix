@@ -1,0 +1,30 @@
+#! /bin/bash
+#SBATCH --job-name=TPM
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=10
+#SBATCH --time=20-00:00:00
+
+echo Start time is `date +%Y/%m/%d--%H:%M`
+
+source ~/.bashrc
+
+
+
+for tissue in N1 N1_OP;
+
+do
+
+
+work_dir=/Input
+sample=$(echo "$tissue" | cut -d '_' -f1)
+fastq_pass=fastq_pass/fastq_${sample}
+
+/opt/app/anaconda3/envs/minimap2/bin/minimap2 -t 20 -ax map-ont -N 10 ${tissue}_eccDNA.sort_extended_sequences.fasta ${fastq_pass}/${sample}.fastq.gz| samtools view -bh > ${work_dir}/${tissue}_aln.bam
+
+
+
+/opt/app/anaconda3/envs/NanoCount/bin/NanoCount -i ${work_dir}/${tissue}_aln.bam --extra_tx_info -o ${work_dir}/${tissue}_transcript_counts.tsv
+
+echo Finish time is `date +%Y/%m/%d--%H:%M`
+
+done
