@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/9cb184ae-b6df-404b-a285-8e8915a19da1)# EccDNA-explorer  
+ EccDNA-explorer  
 
 ## Installation  
 
