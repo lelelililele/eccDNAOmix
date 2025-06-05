@@ -1,0 +1,234 @@
+Epoch 1/60
+Train Loss: 0.6667, AUC: 0.6401, Acc: 0.5979, F1: 0.6391
+Val   Loss: 0.6397, AUC: 0.6926, Acc: 0.6481, F1: 0.6480
+ ✅ 新最佳模型已保存: /home/zhanglili/Tasks/Colorectalca/Comprehensive/Multimodal_deeplearning/tao2k_final0523/outputs/ecc_model_epoch1_auc0.6926.pth
+
+Epoch 2/60
+Train Loss: 0.6403, AUC: 0.6844, Acc: 0.6437, F1: 0.6420
+Val   Loss: 0.6330, AUC: 0.7022, Acc: 0.6549, F1: 0.6360
+ ✅ 新最佳模型已保存: /home/zhanglili/Tasks/Colorectalca/Comprehensive/Multimodal_deeplearning/tao2k_final0523/outputs/ecc_model_epoch2_auc0.7022.pth
+
+Epoch 3/60
+Train Loss: 0.6312, AUC: 0.6989, Acc: 0.6549, F1: 0.6532
+Val   Loss: 0.6255, AUC: 0.7123, Acc: 0.6621, F1: 0.6408
+ ✅ 新最佳模型已保存: /home/zhanglili/Tasks/Colorectalca/Comprehensive/Multimodal_deeplearning/tao2k_final0523/outputs/ecc_model_epoch3_auc0.7123.pth
+
+Epoch 4/60
+Train Loss: 0.6217, AUC: 0.7132, Acc: 0.6663, F1: 0.6635
+Val   Loss: 0.6206, AUC: 0.7226, Acc: 0.6716, F1: 0.6658
+ ✅ 新最佳模型已保存: /home/zhanglili/Tasks/Colorectalca/Comprehensive/Multimodal_deeplearning/tao2k_final0523/outputs/ecc_model_epoch4_auc0.7226.pth
+
+Epoch 5/60
+Train Loss: 0.6110, AUC: 0.7280, Acc: 0.6778, F1: 0.6744
+Val   Loss: 0.6126, AUC: 0.7325, Acc: 0.6794, F1: 0.6732
+ ✅ 新最佳模型已保存: /home/zhanglili/Tasks/Colorectalca/Comprehensive/Multimodal_deeplearning/tao2k_final0523/outputs/ecc_model_epoch5_auc0.7325.pth
+
+Epoch 6/60
+Train Loss: 0.5987, AUC: 0.7436, Acc: 0.6923, F1: 0.6890
+Val   Loss: 0.6064, AUC: 0.7418, Acc: 0.6874, F1: 0.6851
+ ✅ 新最佳模型已保存: /home/zhanglili/Tasks/Colorectalca/Comprehensive/Multimodal_deeplearning/tao2k_final0523/outputs/ecc_model_epoch6_auc0.7418.pth
+
+Epoch 7/60
+Train Loss: 0.5842, AUC: 0.7607, Acc: 0.7069, F1: 0.7030
+Val   Loss: 0.6000, AUC: 0.7513, Acc: 0.6960, F1: 0.6938
+ ✅ 新最佳模型已保存: /home/zhanglili/Tasks/Colorectalca/Comprehensive/Multimodal_deeplearning/tao2k_final0523/outputs/ecc_model_epoch7_auc0.7513.pth
+
+Epoch 8/60
+Train Loss: 0.5707, AUC: 0.7742, Acc: 0.7212, F1: 0.7164
+Val   Loss: 0.5943, AUC: 0.7598, Acc: 0.7047, F1: 0.7035
+ ✅ 新最佳模型已保存: /home/zhanglili/Tasks/Colorectalca/Comprehensive/Multimodal_deeplearning/tao2k_final0523/outputs/ecc_model_epoch8_auc0.7598.pth
+
+Epoch 9/60
+Train Loss: 0.5540, AUC: 0.7901, Acc: 0.7377, F1: 0.7338
+Val   Loss: 0.5894, AUC: 0.7671, Acc: 0.7132, F1: 0.6989
+ ✅ 新最佳模型已保存: /home/zhanglili/Tasks/Colorectalca/Comprehensive/Multimodal_deeplearning/tao2k_final0523/outputs/ecc_model_epoch9_auc0.7671.pth
+
+Epoch 10/60
+Train Loss: 0.5390, AUC: 0.8026, Acc: 0.7508, F1: 0.7462
+Val   Loss: 0.5839, AUC: 0.7733, Acc: 0.7206, F1: 0.7043
+ ✅ 新最佳模型已保存: /home/zhanglili/Tasks/Colorectalca/Comprehensive/Multimodal_deeplearning/tao2k_final0523/outputs/ecc_model_epoch10_auc0.7733.pth
+
+Epoch 11/60
+Train Loss: 0.5235, AUC: 0.8144, Acc: 0.7648, F1: 0.7605
+Val   Loss: 0.5805, AUC: 0.7788, Acc: 0.7281, F1: 0.7202
+ ✅ 新最佳模型已保存: /home/zhanglili/Tasks/Colorectalca/Comprehensive/Multimodal_deeplearning/tao2k_final0523/outputs/ecc_model_epoch11_auc0.7788.pth
+
+Epoch 12/60
+Train Loss: 0.5067, AUC: 0.8262, Acc: 0.7792, F1: 0.7748
+Val   Loss: 0.5758, AUC: 0.7846, Acc: 0.7354, F1: 0.7280
+ ✅ 新最佳模型已保存: /home/zhanglili/Tasks/Colorectalca/Comprehensive/Multimodal_deeplearning/tao2k_final0523/outputs/ecc_model_epoch12_auc0.7846.pth
+
+Epoch 13/60
+Train Loss: 0.4924, AUC: 0.8356, Acc: 0.7897, F1: 0.7857
+Val   Loss: 0.5705, AUC: 0.7891, Acc: 0.7432, F1: 0.7326
+ ✅ 新最佳模型已保存: /home/zhanglili/Tasks/Colorectalca/Comprehensive/Multimodal_deeplearning/tao2k_final0523/outputs/ecc_model_epoch13_auc0.7891.pth
+
+Epoch 14/60
+Train Loss: 0.4746, AUC: 0.8458, Acc: 0.8035, F1: 0.7997
+Val   Loss: 0.5713, AUC: 0.7934, Acc: 0.7494, F1: 0.7457
+ ✅ 新最佳模型已保存: /home/zhanglili/Tasks/Colorectalca/Comprehensive/Multimodal_deeplearning/tao2k_final0523/outputs/ecc_model_epoch14_auc0.7934.pth
+
+Epoch 15/60
+Train Loss: 0.4615, AUC: 0.8530, Acc: 0.8132, F1: 0.8097
+Val   Loss: 0.5661, AUC: 0.7979, Acc: 0.7550, F1: 0.7510
+ ✅ 新最佳模型已保存: /home/zhanglili/Tasks/Colorectalca/Comprehensive/Multimodal_deeplearning/tao2k_final0523/outputs/ecc_model_epoch15_auc0.7979.pth
+
+Epoch 16/60
+Train Loss: 0.4452, AUC: 0.8618, Acc: 0.8247, F1: 0.8215
+Val   Loss: 0.5650, AUC: 0.8004, Acc: 0.7597, F1: 0.7538
+ ✅ 新最佳模型已保存: /home/zhanglili/Tasks/Colorectalca/Comprehensive/Multimodal_deeplearning/tao2k_final0523/outputs/ecc_model_epoch16_auc0.8004.pth
+
+Epoch 17/60
+Train Loss: 0.4325, AUC: 0.8677, Acc: 0.8325, F1: 0.8295
+Val   Loss: 0.5604, AUC: 0.8040, Acc: 0.7645, F1: 0.7586
+ ✅ 新最佳模型已保存: /home/zhanglili/Tasks/Colorectalca/Comprehensive/Multimodal_deeplearning/tao2k_final0523/outputs/ecc_model_epoch17_auc0.8040.pth
+
+Epoch 18/60
+Train Loss: 0.4184, AUC: 0.8741, Acc: 0.8424, F1: 0.8398
+Val   Loss: 0.5642, AUC: 0.8075, Acc: 0.7667, F1: 0.7657
+ ✅ 新最佳模型已保存: /home/zhanglili/Tasks/Colorectalca/Comprehensive/Multimodal_deeplearning/tao2k_final0523/outputs/ecc_model_epoch18_auc0.8075.pth
+
+Epoch 19/60
+Train Loss: 0.4053, AUC: 0.8800, Acc: 0.8502, F1: 0.8476
+Val   Loss: 0.5591, AUC: 0.8071, Acc: 0.7715, F1: 0.7652
+
+Epoch 20/60
+Train Loss: 0.3926, AUC: 0.8845, Acc: 0.8580, F1: 0.8555
+Val   Loss: 0.5617, AUC: 0.8059, Acc: 0.7733, F1: 0.7637
+
+Epoch 21/60
+Train Loss: 0.3815, AUC: 0.8899, Acc: 0.8646, F1: 0.8624
+Val   Loss: 0.5620, AUC: 0.8098, Acc: 0.7766, F1: 0.7767
+ ✅ 新最佳模型已保存: /home/zhanglili/Tasks/Colorectalca/Comprehensive/Multimodal_deeplearning/tao2k_final0523/outputs/ecc_model_epoch21_auc0.8098.pth
+
+Epoch 22/60
+Train Loss: 0.3714, AUC: 0.8938, Acc: 0.8698, F1: 0.8679
+Val   Loss: 0.5632, AUC: 0.8098, Acc: 0.7783, F1: 0.7792
+
+Epoch 23/60
+Train Loss: 0.3620, AUC: 0.8972, Acc: 0.8755, F1: 0.8735
+Val   Loss: 0.5625, AUC: 0.8103, Acc: 0.7799, F1: 0.7783
+ ✅ 新最佳模型已保存: /home/zhanglili/Tasks/Colorectalca/Comprehensive/Multimodal_deeplearning/tao2k_final0523/outputs/ecc_model_epoch23_auc0.8103.pth
+
+Epoch 24/60
+Train Loss: 0.3513, AUC: 0.9012, Acc: 0.8813, F1: 0.8795
+Val   Loss: 0.5602, AUC: 0.8097, Acc: 0.7831, F1: 0.7763
+
+Epoch 25/60
+Train Loss: 0.3429, AUC: 0.9046, Acc: 0.8859, F1: 0.8842
+Val   Loss: 0.5647, AUC: 0.8105, Acc: 0.7843, F1: 0.7835
+ ✅ 新最佳模型已保存: /home/zhanglili/Tasks/Colorectalca/Comprehensive/Multimodal_deeplearning/tao2k_final0523/outputs/ecc_model_epoch25_auc0.8105.pth
+
+Epoch 26/60
+Train Loss: 0.3345, AUC: 0.9076, Acc: 0.8900, F1: 0.8884
+Val   Loss: 0.5609, AUC: 0.8163, Acc: 0.7881, F1: 0.7876
+ ✅ 新最佳模型已保存: /home/zhanglili/Tasks/Colorectalca/Comprehensive/Multimodal_deeplearning/tao2k_final0523/outputs/ecc_model_epoch26_auc0.8163.pth
+
+Epoch 27/60
+Train Loss: 0.3273, AUC: 0.9106, Acc: 0.8937, F1: 0.8923
+Val   Loss: 0.5630, AUC: 0.8131, Acc: 0.7880, F1: 0.7845
+
+Epoch 28/60
+Train Loss: 0.3203, AUC: 0.9136, Acc: 0.8973, F1: 0.8959
+Val   Loss: 0.5607, AUC: 0.8185, Acc: 0.7910, F1: 0.7892
+ ✅ 新最佳模型已保存: /home/zhanglili/Tasks/Colorectalca/Comprehensive/Multimodal_deeplearning/tao2k_final0523/outputs/ecc_model_epoch28_auc0.8185.pth
+
+Epoch 29/60
+Train Loss: 0.3171, AUC: 0.9153, Acc: 0.8990, F1: 0.8977
+Val   Loss: 0.5691, AUC: 0.8154, Acc: 0.7887, F1: 0.7895
+
+Epoch 30/60
+Train Loss: 0.3106, AUC: 0.9167, Acc: 0.9022, F1: 0.9010
+Val   Loss: 0.5649, AUC: 0.8185, Acc: 0.7921, F1: 0.7904
+
+Epoch 31/60
+Train Loss: 0.3056, AUC: 0.9197, Acc: 0.9043, F1: 0.9031
+Val   Loss: 0.5628, AUC: 0.8190, Acc: 0.7937, F1: 0.7899
+ ✅ 新最佳模型已保存: /home/zhanglili/Tasks/Colorectalca/Comprehensive/Multimodal_deeplearning/tao2k_final0523/outputs/ecc_model_epoch31_auc0.8190.pth
+
+Epoch 32/60
+Train Loss: 0.3005, AUC: 0.9210, Acc: 0.9070, F1: 0.9058
+Val   Loss: 0.5723, AUC: 0.8180, Acc: 0.7916, F1: 0.7932
+
+Epoch 33/60
+Train Loss: 0.2945, AUC: 0.9245, Acc: 0.9095, F1: 0.9084
+Val   Loss: 0.5700, AUC: 0.8197, Acc: 0.7936, F1: 0.7936
+ ✅ 新最佳模型已保存: /home/zhanglili/Tasks/Colorectalca/Comprehensive/Multimodal_deeplearning/tao2k_final0523/outputs/ecc_model_epoch33_auc0.8197.pth
+
+Epoch 34/60
+Train Loss: 0.2915, AUC: 0.9257, Acc: 0.9111, F1: 0.9100
+Val   Loss: 0.5693, AUC: 0.8192, Acc: 0.7943, F1: 0.7928
+
+Epoch 35/60
+Train Loss: 0.2879, AUC: 0.9276, Acc: 0.9126, F1: 0.9115
+Val   Loss: 0.5667, AUC: 0.8153, Acc: 0.7954, F1: 0.7881
+
+Epoch 36/60
+Train Loss: 0.2849, AUC: 0.9286, Acc: 0.9141, F1: 0.9131
+Val   Loss: 0.5736, AUC: 0.8191, Acc: 0.7946, F1: 0.7950
+
+Epoch 37/60
+Train Loss: 0.2814, AUC: 0.9299, Acc: 0.9158, F1: 0.9147
+Val   Loss: 0.5680, AUC: 0.8225, Acc: 0.7974, F1: 0.7956
+ ✅ 新最佳模型已保存: /home/zhanglili/Tasks/Colorectalca/Comprehensive/Multimodal_deeplearning/tao2k_final0523/outputs/ecc_model_epoch37_auc0.8225.pth
+
+Epoch 38/60
+Train Loss: 0.2788, AUC: 0.9318, Acc: 0.9167, F1: 0.9157
+Val   Loss: 0.5713, AUC: 0.8201, Acc: 0.7969, F1: 0.7949
+
+Epoch 39/60
+Train Loss: 0.2749, AUC: 0.9325, Acc: 0.9185, F1: 0.9174
+Val   Loss: 0.5692, AUC: 0.8205, Acc: 0.7987, F1: 0.7969
+
+Epoch 40/60
+Train Loss: 0.2717, AUC: 0.9344, Acc: 0.9200, F1: 0.9190
+Val   Loss: 0.5776, AUC: 0.8179, Acc: 0.7961, F1: 0.7967
+
+Epoch 41/60
+Train Loss: 0.2713, AUC: 0.9360, Acc: 0.9200, F1: 0.9189
+Val   Loss: 0.5746, AUC: 0.8211, Acc: 0.7975, F1: 0.7960
+
+Epoch 42/60
+Train Loss: 0.2628, AUC: 0.9378, Acc: 0.9238, F1: 0.9229
+Val   Loss: 0.5760, AUC: 0.8193, Acc: 0.7980, F1: 0.7980
+
+Epoch 43/60
+Train Loss: 0.2579, AUC: 0.9398, Acc: 0.9261, F1: 0.9253
+Val   Loss: 0.5726, AUC: 0.8208, Acc: 0.7998, F1: 0.7980
+
+Epoch 44/60
+Train Loss: 0.2557, AUC: 0.9405, Acc: 0.9269, F1: 0.9260
+Val   Loss: 0.5732, AUC: 0.8220, Acc: 0.8004, F1: 0.7993
+
+Epoch 45/60
+Train Loss: 0.2539, AUC: 0.9419, Acc: 0.9277, F1: 0.9268
+Val   Loss: 0.5822, AUC: 0.8192, Acc: 0.7980, F1: 0.7988
+
+Epoch 46/60
+Train Loss: 0.2483, AUC: 0.9440, Acc: 0.9302, F1: 0.9294
+Val   Loss: 0.5773, AUC: 0.8218, Acc: 0.7998, F1: 0.7979
+
+Epoch 47/60
+Train Loss: 0.2461, AUC: 0.9449, Acc: 0.9312, F1: 0.9304
+Val   Loss: 0.5824, AUC: 0.8179, Acc: 0.7992, F1: 0.8008
+
+ ⏹️ Early stopping at epoch 47. Best Val AUC = 0.8225
+
+====== 单模态评估（测试集） ======
+seq AUC: 0.7281
+snp AUC: 0.5016
+variant AUC: 0.5015
+methylation AUC: 0.5264
+expression AUC: 0.5017
+m6a AUC: 0.4881
+DNA6mA AUC: 0.5402
+
+====== Final Validation Results ======
+Accuracy: 0.7992
+F1 Score: 0.8008
+AUC-ROC : 0.8179
+ROC curve saved to: /home/zhanglili/Tasks/Colorectalca/Comprehensive/Multimodal_deeplearning/tao2k_final0523/outputs/roc_curve.png
+/home/zhanglili/.conda/envs/fusions/lib/python3.8/site-packages/umap/umap_.py:1952: UserWarning: n_jobs value 1 overridden to 1 by setting random_state. Use no seed for parallelism.
+  warn(
+UMAP 可视化图已保存至: /home/zhanglili/Tasks/Colorectalca/Comprehensive/Multimodal_deeplearning/tao2k_final0523/outputs/roc_curve.png
+中间层特征保存至: /home/zhanglili/Tasks/Colorectalca/Comprehensive/Multimodal_deeplearning/tao2k_final0523/outputs/extracted_features.np
