@@ -1,4 +1,4 @@
- EccDNA-explorer  
+# EccDNA-explorer  
 
 ## Installation  
 
