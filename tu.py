@@ -3,8 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # 读取日志文件
-#with open("/home/zhanglili/Tasks/Colorectalca/Comprehensive/Multimodal_deeplearning/tao2k_final/outputs/out_Epoch35.csv", "r",encoding="utf-8") as f:
-with open("/home/zhanglili/Tasks/Colorectalca/Comprehensive/Multimodal_deeplearning/tao2k_final0523/outputs_zengqiangseq/out.csv", "r",encoding="utf-8") as f:
+with open("./outputs/out.csv", "r",encoding="utf-8") as f:
     lines = f.readlines()
 
 # 初始化存储指标的列表
