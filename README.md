@@ -1,4 +1,4 @@
-# EccDNA-explorer  
+![image](https://github.com/user-attachments/assets/9cb184ae-b6df-404b-a285-8e8915a19da1)# EccDNA-explorer  
 
 ## Installation  
 
@@ -129,4 +129,11 @@ python eccDNA_TPM.py -i N1_eccDNA_TPM.npz N2_eccDNA_TPM.npz N3_eccDNA_TPM.npz N4
 ```
 
 ## Step3: Model training  
+After preparing the input dataset, execute main.py to train multiple deep learning models:
+```bash 
+python main.py
+```
+All output files will be saved in the ./output/ directory.
+
+
 
