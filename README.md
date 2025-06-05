@@ -1,4 +1,5 @@
 # EccDNA-explorer  
+![Abstract](https://github.com/user-attachments/assets/3cdbfab7-a63f-4803-99c0-686e563ef6eb)
 
 ## Installation  
 
