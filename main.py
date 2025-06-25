@@ -126,20 +126,4 @@ for mod in modalities:
 #多模态评估 + ROC
 final_metrics(model, test_loader, modalities, device)
 
-# 特征提取 + UMAP 可视化
-layer_names = [name for name, module in model.named_modules()
-               if isinstance(module, (nn.Conv1d, nn.Linear))]
-extractor = FeatureExtractor(model, layer_names)
 
-test_inputs = next(iter(test_loader))
-test_feat = extractor.get_features(test_inputs)
-first_layer = list(test_feat.keys())[0]
-test_features = test_feat[first_layer].cpu().numpy()
-test_labels_batch = test_inputs['labels'].cpu().numpy()
-
-visualize_umap(test_features, test_features, test_labels_batch, test_labels_batch)
-
-np.savez_compressed(FEATURE_SAVE_PATH,
-                    train_features=test_features,
-                    val_features=test_features)
-print(f"中间层特征保存至: {FEATURE_SAVE_PATH}")
