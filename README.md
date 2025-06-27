@@ -143,11 +143,13 @@ Users can directly utilize our trained model to predict whether DNA sequences ca
 ```bash 
 python eccDNAPredict.py -i file.txt -o eccDNA_output
 ```
+
 ```bash 
 file.txt:
 ATCGATCGATGCTAGCTAGCTAGGCTAGCTAGCTAGGCTAGCTAGCTAGGCTAGCTAGCTAGATC...
 TCGATGCTAGCTAGCTAGGCTAGCTAGCTAGGCTAGCTAGCTAGGCTAGCTAGCTAGATCGATCG...
 ```
+![图片1](https://github.com/user-attachments/assets/14b84869-c016-4f65-aed2-668b41c5527e)
 
 The prediction file was like:  
 |SequenceID|Sequence|Prediction|Probability|
