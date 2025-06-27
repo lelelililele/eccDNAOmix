@@ -134,22 +134,24 @@ After preparing the input dataset, execute main.py to train multiple deep learni
 ```bash 
 python main.py
 ```
-![Abstract](https://github.com/user-attachments/assets/3cdbfab7-a63f-4803-99c0-686e563ef6eb)
+![画图_3](https://github.com/user-attachments/assets/628ddf07-c26b-44bf-bebd-76b311ce517a)
+
 
 All output files will be saved in the ./output/ directory.
 
 ## Step4: eccDNA predict
 Users can directly utilize our trained model to predict whether DNA sequences can form eccDNA. Please note that input sequences should include 100bp upstream and downstream of the potential eccDNA start/end sites, with candidate sequences not exceeding 1000bp in length.  
+
 ```bash 
 python eccDNAPredict.py -i file.txt -o eccDNA_output
 ```
 
 ```bash 
-file.txt:
+file.txt: 
 ATCGATCGATGCTAGCTAGCTAGGCTAGCTAGCTAGGCTAGCTAGCTAGGCTAGCTAGCTAGATC...
 TCGATGCTAGCTAGCTAGGCTAGCTAGCTAGGCTAGCTAGCTAGGCTAGCTAGCTAGATCGATCG...
 ```
-![图片1](https://github.com/user-attachments/assets/14b84869-c016-4f65-aed2-668b41c5527e)
+Each line is an independent sequence.
 
 The prediction file was like:  
 |SequenceID|Sequence|Prediction|Probability|
