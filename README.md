@@ -144,8 +144,9 @@ Users can directly utilize our trained model to predict whether DNA sequences ca
 python eccDNAPredict.py -i file.txt -o eccDNA_output
 ```
 The prediction file was like:  
-SequenceID	Sequence	Prediction	Probability    
-1  ATCG...  Non-eccDNA  0.0942  
-2  TCGA...  eccDNA  0.967  
+|SequenceID|Sequence|Prediction|Probability|
+————————————————————————————————
+|1|ATCG...|Non-eccDNA|0.0942|  
+|2|TCGA...|eccDNA|0.967|  
 
 
