@@ -134,7 +134,8 @@ After preparing the input dataset, execute main.py to train multiple deep learni
 ```bash 
 python main.py
 ```
-![画图_3](https://github.com/user-attachments/assets/628ddf07-c26b-44bf-bebd-76b311ce517a)
+![画图_3](https://github.com/user-attachments/assets/88d68d45-7656-4b71-8a5c-166be381babe)
+
 
 
 All output files will be saved in the ./output/ directory.
@@ -152,6 +153,8 @@ ATCGATCGATGCTAGCTAGCTAGGCTAGCTAGCTAGGCTAGCTAGCTAGGCTAGCTAGCTAGATC...
 TCGATGCTAGCTAGCTAGGCTAGCTAGCTAGGCTAGCTAGCTAGGCTAGCTAGCTAGATCGATCG...
 ```
 Each line is an independent sequence.
+![eccDNA](https://github.com/user-attachments/assets/2cc524dc-007b-4420-9a66-114150928aab)
+
 
 The prediction file was like:  
 |SequenceID|Sequence|Prediction|Probability|
