@@ -1,5 +1,5 @@
 # EccDNA-explorer  
-![Abstract](https://github.com/user-attachments/assets/3cdbfab7-a63f-4803-99c0-686e563ef6eb)
+![figure1](https://github.com/user-attachments/assets/9e3de0cc-d907-499a-a81c-0ae1ef853adf)
 
 ## Installation  
 
@@ -134,7 +134,7 @@ After preparing the input dataset, execute main.py to train multiple deep learni
 ```bash 
 python main.py
 ```
-![figure1](https://github.com/user-attachments/assets/9e3de0cc-d907-499a-a81c-0ae1ef853adf)
+![Abstract](https://github.com/user-attachments/assets/3cdbfab7-a63f-4803-99c0-686e563ef6eb)
 
 All output files will be saved in the ./output/ directory.
 
