@@ -138,5 +138,14 @@ python main.py
 
 All output files will be saved in the ./output/ directory.
 
+## Step4: eccDNA predict
+Users can directly utilize our trained model to predict whether DNA sequences can form eccDNA. Please note that input sequences should include 100bp upstream and downstream of the potential eccDNA start/end sites, with candidate sequences not exceeding 1000bp in length.  
+```bash 
+python eccDNAPredict.py -i file.txt -o eccDNA_output
+```
+The prediction file was like:  
+SequenceID	Sequence	Prediction	Probability    
+1  ATCG...  Non-eccDNA  0.0942  
+2  TCGA...  eccDNA  0.967  
 
 
