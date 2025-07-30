@@ -21,13 +21,13 @@ We recommend creating the environment and installing it with conda:
 1. Create conda envireoment  
   
 ```bash
-conda create -n eccDNA_explorer python=3.8.5
+conda create -n eccDNAOmix python=3.8.5
 ```
 
 2. Activate conda  
 
 ```bash  
-conda activate eccDNA_explorer
+conda activate eccDNAOmix
 ```
 
 3. Install python packages  
