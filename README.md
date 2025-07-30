@@ -1,4 +1,4 @@
-# EccDNA-explorer  
+# ​​eccDNAOmix​​  
 ![figure1](https://github.com/user-attachments/assets/9e3de0cc-d907-499a-a81c-0ae1ef853adf)
 
 ## Installation  
