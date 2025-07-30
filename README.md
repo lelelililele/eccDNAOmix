@@ -38,12 +38,12 @@ pip install numpy==1.24.3 pandas==2.0.3 scipy==1.10.1 biopython==1.83 scikit-lea
 
 Then you can download this git clone, and use the script. The software [bedtools](https://bedtools.readthedocs.io/en/latest/index.html) and [human hg38 reference fasta](https://github.com/broadinstitute/gatk/blob/master/src/test/resources/large/Homo_sapiens_assembly38.fasta.gz) were also needed.  
 
-## The current code runs successfully on systems with:  
+## The current training code runs successfully on systems with:  
 
 ​​NVIDIA-SMI 525.60.13 (Driver Version: 525.60.13, CUDA Version: 12.0)​​  
 ​​NVIDIA-SMI 535.86.05 (Driver Version: 535.86.05, CUDA Version: 12.2)​  
 
-## If you want to directly use the pre-trained human model, you can skip to ​​[Step4](#step4).
+## If you want to directly use the pre-trained human model, Cpu is enough and you can skip to ​​[Step4](#step4).
 ## Step1: Data preparation  
 In this step, we require an example file 'N1_eccDNA.sort.bed' to demonstrate the analysis pipeline. 
 
