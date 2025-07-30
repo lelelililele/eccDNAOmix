@@ -36,7 +36,7 @@ conda activate eccDNAOmix
 pip install numpy==1.24.3 pandas==2.0.3 scipy==1.10.1 biopython==1.83 scikit-learn==1.3.2 xgboost==0.90 umap-learn==0.5.7 torch==2.4.1 matplotlib==3.7.5
 ```  
 
-The software [bedtools](https://bedtools.readthedocs.io/en/latest/index.html) and [human hg38 reference fasta](https://github.com/broadinstitute/gatk/blob/master/src/test/resources/large/Homo_sapiens_assembly38.fasta.gz) were also needed.   
+Then you can download this git clone, and use the script. The software [bedtools](https://bedtools.readthedocs.io/en/latest/index.html) and [human hg38 reference fasta](https://github.com/broadinstitute/gatk/blob/master/src/test/resources/large/Homo_sapiens_assembly38.fasta.gz) were also needed.   
 
 ## If you want to directly use the pre-trained human model, you can skip to ​​[Step4](#step4).
 ## Step1: Data preparation  
