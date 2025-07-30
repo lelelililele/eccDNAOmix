@@ -148,7 +148,7 @@ def main():
         sys.exit(1)
 
     # Load model
-    model_path = os.path.join(os.path.dirname(__file__), "outputs", "ecc_model_epoch37_auc0.8225.pth")
+    model_path = os.path.join(os.path.dirname(__file__), "output", "ecc_model_epoch37_auc0.8225.pth")
     model = load_trained_model(model_path)
 
     # Generate dataset
