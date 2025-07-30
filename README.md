@@ -1,4 +1,6 @@
 # ​​eccDNAOmix​​  
+## Introduction
+Extrachromosomal circular DNA (eccDNA) represents a unique class of circular DNA molecules derived from chromosomes that are closely associated with oncogene amplification. However, eccDNAs exhibit significant heterogeneity among individuals, making it challenging to characterize them using uniform data features. In this study, we developed a multimodal deep learning framework for predicting and characterizing eccDNAs by performing multi-omics sequencing on colorectal cancer tumor tissues and paired adjacent normal tissues. Integrating our former established eccDNA sequencing pipeline with multi-dimensional omics data including DNA sequences, single nucleotide variants/insertions-deletions (SNV/InDel), structural variations (SV), DNA/RNA modifications, and RNA expression profiles, we constructed an adaptive gated fusion model that dynamically weights the contributions of each modality while employing a masking strategy to filter out non-biological noise. The model demonstrated well performance in validation set (AUC=0.823), with the DNA sequence modality showing the highest predictive contribution (AUC=0.756).   
 ![figure1](https://github.com/user-attachments/assets/9e3de0cc-d907-499a-a81c-0ae1ef853adf)
 
 ## Installation  
