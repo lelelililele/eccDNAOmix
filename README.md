@@ -170,4 +170,18 @@ The prediction file was like:
 |1         |ATCG... |Non-eccDNA|0.0942     |  
 |2         |TCGA... |eccDNA    |0.967      |  
 
+Users can use our trained model to predict whether sequences with multi-omics features can form eccDNA.
+
+```bash 
+python eccDNAPredictOmix.py -i /path/to/files -o eccDNA_output
+```
+The input directory should contain ".npz" feature files, such as:  
+
+"DNA6mA.npz expression.npz m6a.npz methylation.npz seq.npz snp.npz variant.npz".  
+
+These files can be generated using the scripts in the "Step1 Data Preparation" and "Step2 Data Combination" folders.  
+
+
+
+
 
