@@ -15,6 +15,7 @@ You can install just the base python(v3.8) packages, include:
 - umap-learn
 - torch
 - matplotlib
+- joblib
 
 We recommend creating the environment and installing it with conda:  
 
@@ -33,7 +34,7 @@ conda activate eccDNAOmix
 3. Install python packages  
 
 ```bash
-pip install numpy==1.24.3 pandas==2.0.3 scipy==1.10.1 biopython==1.83 scikit-learn==1.3.2 xgboost==0.90 umap-learn==0.5.7 torch==2.4.1 matplotlib==3.7.5
+pip install numpy==1.24.3 pandas==2.0.3 scipy==1.10.1 biopython==1.83 scikit-learn==1.3.2 xgboost==0.90 umap-learn==0.5.7 torch==2.4.1 matplotlib==3.7.5 joblib==1.4.2
 ```  
 
 Then you can download this git clone, and use the script. The software [bedtools](https://bedtools.readthedocs.io/en/latest/index.html) and [human hg38 reference fasta](https://github.com/broadinstitute/gatk/blob/master/src/test/resources/large/Homo_sapiens_assembly38.fasta.gz) were also needed.  
