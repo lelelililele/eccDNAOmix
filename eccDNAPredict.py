@@ -21,7 +21,6 @@ from models import DeepMultimodalModel
 from train_utils import train_model
 from eval_utils import evaluate_modality, final_metrics
 from feature_extract import FeatureExtractor
-from umap_vis import visualize_umap
 #import seaborn as sns
 from scipy.stats import spearmanr
 from sklearn.manifold import MDS  # 新增导入
