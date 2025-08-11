@@ -169,7 +169,8 @@ The prediction file was like:
 |SequenceID|Sequence|Prediction|Probability|
 |----------|--------|----------|-----------|
 |1         |ATCG... |Non-eccDNA|0.0942     |  
-|2         |TCGA... |eccDNA    |0.967      |  
+|2         |GCTA... |Non-eccDNA|0.0896     |
+|3         |CGGC... |eccDNA|0.9272     |
 
 Users can use our trained model to predict whether sequences with multi-omics features can form eccDNA.
 
