@@ -12,7 +12,7 @@ from data_utils import generate_xgb_features, transform_xgb_features, Multimodal
 from models import DeepMultimodalModel
 from train_utils import train_model
 from eval_utils import evaluate_modality, final_metrics
-from feature_extract import FeatureExtractor
+
 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
