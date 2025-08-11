@@ -20,7 +20,7 @@ from data_utils import generate_xgb_features, transform_xgb_features, Multimodal
 from models import DeepMultimodalModel
 from train_utils import train_model
 from eval_utils import evaluate_modality, final_metrics
-from feature_extract import FeatureExtractor
+#from feature_extract import FeatureExtractor
 #import seaborn as sns
 from scipy.stats import spearmanr
 from sklearn.manifold import MDS  # 新增导入
