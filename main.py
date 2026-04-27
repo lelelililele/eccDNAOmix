@@ -118,9 +118,12 @@ history = train_model(
 
 #单模态评估
 print("\n====== 单模态评估（测试集） ======")
+#for mod in modalities:
+#    auc = evaluate_modality(model, mod, test_loader, modalities, device)
+#    print(f"{mod} AUC: {auc:.4f}")
 for mod in modalities:
-    auc = evaluate_modality(model, mod, test_loader, modalities, device)
-    print(f"{mod} AUC: {auc:.4f}")
+    # 接收 5 个值，我们只用第一个 auc 来打印，其余的会自动在函数内打印
+    auc, acc, pre, rec, f1 = evaluate_modality(model, mod, test_loader, modalities, device)
 
 #多模态评估 + ROC
 final_metrics(model, test_loader, modalities, device)
