@@ -194,10 +194,10 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(np.zeros(len(full_labels))
     cv_metrics['f1'].append(f1)
 
 # ==========================================
-# 第三步：输出 5 折交叉验证的最终统计结果
+# 第三步：输出 10 折交叉验证的最终统计结果
 # ==========================================
 print("\n" + "="*40)
-print("5-Fold Cross Validation Final Results:")
+print("10-Fold Cross Validation Final Results:")
 print("="*40)
 print(f"AUC:       {np.mean(cv_metrics['auc']):.4f} ± {np.std(cv_metrics['auc']):.4f}")
 print(f"Accuracy:  {np.mean(cv_metrics['acc']):.4f} ± {np.std(cv_metrics['acc']):.4f}")
