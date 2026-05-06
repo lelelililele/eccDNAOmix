@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 import glob
 import numpy as np
@@ -145,25 +144,19 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(np.zeros(len(full_labels))
     pos_weight = torch.tensor([(train_labels == 0).sum() / (train_labels == 1).sum()]).to(device)
     loss_fn = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
     optimizer = optim.AdamW(model.parameters(), lr=4e-6, weight_decay=4e-1)
-    
-    # 调度器监控目标改为求最小 Loss ('min')
-    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.7, patience=3, verbose=True)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.7, patience=3, verbose=False)
 
     # 训练参数设定
     num_epochs = 60
     patience = 10
-    
-    # 记录最佳验证集 Loss
-    best_val_loss = float('inf') 
+    best_val_auc = 0.0
     patience_counter = 0
-    min_delta = 1e-4
-    
     best_model_path = os.path.join(OUTPUT_DIR, f"ecc_model_fold_{fold+1}_best.pth")
 
     print_log("\nStart Training...")
 
     # ==========================================
-    # 内嵌的自定义训练循环
+    # 内嵌的自定义训练循环 (记录所有指标)
     # ==========================================
     for epoch in range(num_epochs):
         # --- 训练阶段 ---
@@ -233,24 +226,23 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(np.zeros(len(full_labels))
         print_log(f"Train Loss: {train_loss:.4f}, AUC: {train_auc:.4f}, Acc: {train_acc:.4f}, Pre: {train_pre:.4f}, Rec: {train_rec:.4f}, F1: {train_f1:.4f}")
         print_log(f"Val   Loss: {val_loss:.4f}, AUC: {val_auc:.4f}, Acc: {val_acc:.4f}, Pre: {val_pre:.4f}, Rec: {val_rec:.4f}, F1: {val_f1:.4f}")
 
-        # 基于 Val Loss 降低来保存模型
-        if val_loss < (best_val_loss - min_delta):
-            best_val_loss = val_loss
+        # --- 保存最佳模型 ---
+        if val_auc > best_val_auc:
+            best_val_auc = val_auc
             torch.save(model.state_dict(), best_model_path)
-            print_log(f" ✅ 新最佳模型已保存: {best_model_path} (Val Loss: {val_loss:.4f}, 此时 AUC: {val_auc:.4f})")
+            print_log(f" ✅ 新最佳模型已保存: {best_model_path} (AUC: {val_auc:.4f})")
             patience_counter = 0
         else:
             patience_counter += 1
 
-        # 调度器根据 val_loss 更新
-        scheduler.step(val_loss)
+        scheduler.step(val_auc)
 
         if patience_counter >= patience:
-            print_log(f" ⏹️ Early stopping triggered at epoch {epoch+1}. Best Val Loss was = {best_val_loss:.4f}")
+            print_log(f" ⏹️ Early stopping at epoch {epoch+1}. Best Val AUC = {best_val_auc:.4f}")
             break
 
     # ==========================================
-    # 模型评估
+    # 模型评估 (严格使用本折最优 AUC 的模型)
     # ==========================================
     print_log(f"\n====== 加载 Fold {fold + 1} 的最强模型进行最终代表性评估 ======")
     model.load_state_dict(torch.load(best_model_path))
