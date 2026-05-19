@@ -2,7 +2,7 @@ import os
 import subprocess
 
 # 基础路径定义
-base_dir = "/home/zhanglili/Tasks/Colorectalca/Comprehensive/Multimodal_deeplearning"
+base_dir = "*/Multimodal_deeplearning"
 
 
 modality_config = {
