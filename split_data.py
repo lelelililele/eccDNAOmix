@@ -4,7 +4,7 @@ import subprocess
 # 基础路径定义
 base_dir = "/home/zhanglili/Tasks/Colorectalca/Comprehensive/Multimodal_deeplearning"
 
-# 精确定义各模态的正负处理脚本、所在文件夹，以及正负样本的后缀名
+
 modality_config = {
     "seq": {
         "pos_script": "eccDNA_onehot_npz_process.py",
@@ -60,7 +60,6 @@ modality_config = {
 tissues = ['N', 'T']
 
 def run_command(cmd):
-    """执行 shell 命令并处理可能出现的错误"""
     print(f"  正在执行命令: {cmd}")
     try:
         subprocess.run(cmd, shell=True, check=True)
@@ -68,7 +67,6 @@ def run_command(cmd):
         print(f"  [错误] 脚本执行失败: {e}")
 
 def get_file_list(patients, tissue_types, folder, suffix):
-    """根据患者列表、组织类型和后缀生成所需的文件绝对路径列表"""
     file_list = []
     for p in patients:
         for t in tissue_types:
