@@ -7,7 +7,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import StratifiedKFold
-from sklearn.metrics import roc_auc_score, accuracy_score, precision_score, recall_score, f1_score
+from sklearn.metrics import roc_auc_score, accuracy_score, precision_score, recall_score, f1_score, roc_curve
 import logging
 import sys
 
@@ -21,7 +21,6 @@ from models import DeepMultimodalModel
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 log_file = os.path.join(OUTPUT_DIR, "10fold_cv_training_log.txt")
 
-# 移除所有已存在的 handler 防止重复打印
 for handler in logging.root.handlers[:]:
     logging.root.removeHandler(handler)
 
@@ -38,7 +37,7 @@ def print_log(message):
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print_log(f"\nUsing device: {device}")
 
-# 通用数据加载函数保持不变
+# 通用数据加载函数
 def load_split_data(mod, split='train'):
     base_dir = f'split_data/{split}'
     neg_file = glob.glob(f'{base_dir}/negative/*{mod}*.npz')[0]
@@ -89,7 +88,7 @@ for mod in modalities:
 n_splits = 10
 skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
 
-cv_metrics = {'auc': [], 'acc': [], 'pre': [], 'rec': [], 'f1': []}
+cv_metrics = {'auc': [], 'acc': [], 'pre': [], 'rec': [], 'f1': [], 'thresholds': []}
 
 print_log(f"\nStarting {n_splits}-Fold Cross Validation...")
 
@@ -148,15 +147,13 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(np.zeros(len(full_labels))
 
     # 训练参数设定
     num_epochs = 60
-    patience = 10
-    best_val_auc = 0.0
-    patience_counter = 0
     best_model_path = os.path.join(OUTPUT_DIR, f"ecc_model_fold_{fold+1}_best.pth")
+    epoch_metrics = []
 
     print_log("\nStart Training...")
 
     # ==========================================
-    # 内嵌的自定义训练循环 (记录所有指标)
+    # 内嵌的自定义训练循环 (每轮监控 5 大指标)
     # ==========================================
     for epoch in range(num_epochs):
         # --- 训练阶段 ---
@@ -186,7 +183,12 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(np.zeros(len(full_labels))
 
         train_loss /= len(train_loader.dataset)
         train_auc = roc_auc_score(train_targets, train_preds)
-        train_bin = (np.array(train_preds) >= 0.5).astype(int)
+        
+        # 为当前 Epoch 的训练集计算动态最优阈值 (仅用于日志打印监控)
+        fpr_t, tpr_t, thresholds_t = roc_curve(train_targets, train_preds)
+        epoch_thresh = thresholds_t[np.argmax(tpr_t - fpr_t)]
+        
+        train_bin = (np.array(train_preds) >= epoch_thresh).astype(int)
         train_acc = accuracy_score(train_targets, train_bin)
         train_pre = precision_score(train_targets, train_bin, zero_division=0)
         train_rec = recall_score(train_targets, train_bin, zero_division=0)
@@ -215,39 +217,90 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(np.zeros(len(full_labels))
 
         val_loss /= len(val_loader.dataset)
         val_auc = roc_auc_score(val_targets, val_preds)
-        val_bin = (np.array(val_preds) >= 0.5).astype(int)
+        
+        # 将当前 Epoch 训练集算出的阈值应用于验证集打印监控
+        val_bin = (np.array(val_preds) >= epoch_thresh).astype(int)
         val_acc = accuracy_score(val_targets, val_bin)
         val_pre = precision_score(val_targets, val_bin, zero_division=0)
         val_rec = recall_score(val_targets, val_bin, zero_division=0)
         val_f1 = f1_score(val_targets, val_bin, zero_division=0)
 
-        # --- 输出与日志记录 ---
-        print_log(f"\nEpoch {epoch+1}/{num_epochs}")
-        print_log(f"Train Loss: {train_loss:.4f}, AUC: {train_auc:.4f}, Acc: {train_acc:.4f}, Pre: {train_pre:.4f}, Rec: {train_rec:.4f}, F1: {train_f1:.4f}")
-        print_log(f"Val   Loss: {val_loss:.4f}, AUC: {val_auc:.4f}, Acc: {val_acc:.4f}, Pre: {val_pre:.4f}, Rec: {val_rec:.4f}, F1: {val_f1:.4f}")
+        # 记录每轮数据以寻找最佳稳定区间
+        epoch_metrics.append({
+            'epoch': epoch + 1,
+            'val_loss': val_loss,
+            'val_auc': val_auc,
+            'state_dict': {k: v.cpu() for k, v in model.state_dict().items()}
+        })
 
-        # --- 保存最佳模型 ---
-        if val_auc > best_val_auc:
-            best_val_auc = val_auc
-            torch.save(model.state_dict(), best_model_path)
-            print_log(f" ✅ 新最佳模型已保存: {best_model_path} (AUC: {val_auc:.4f})")
-            patience_counter = 0
-        else:
-            patience_counter += 1
-
+        # 打印所有 5 大指标，同步写入 txt 日志文件
+        print_log(f"Epoch {epoch+1}/{num_epochs} (Epoch Thresh: {epoch_thresh:.4f})")
+        print_log(f"  Train -> Loss: {train_loss:.4f} | AUC: {train_auc:.4f} | Acc: {train_acc:.4f} | Pre: {train_pre:.4f} | Rec: {train_rec:.4f} | F1: {train_f1:.4f}")
+        print_log(f"  Val   -> Loss: {val_loss:.4f} | AUC: {val_auc:.4f} | Acc: {val_acc:.4f} | Pre: {val_pre:.4f} | Rec: {val_rec:.4f} | F1: {val_f1:.4f}")
+        print_log("-" * 60)
+        
         scheduler.step(val_auc)
 
-        if patience_counter >= patience:
-            print_log(f" ⏹️ Early stopping at epoch {epoch+1}. Best Val AUC = {best_val_auc:.4f}")
-            break
+    # 在最平稳的 Val Loss 区间中挑选最大的 AUC 模型作为本折最佳模型
+    window_size = 5
+    best_state_dict = None
+    max_target_auc = 0.0
+
+    if len(epoch_metrics) >= window_size:
+        stable_windows = []
+        for i in range(len(epoch_metrics) - window_size + 1):
+            window_losses = [m['val_loss'] for m in epoch_metrics[i:i+window_size]]
+            variance = np.var(window_losses)
+            stable_windows.append((variance, i, i+window_size))
+        
+        stable_windows.sort(key=lambda x: x[0])
+        top_stable_windows = stable_windows[:3]
+
+        for _, start, end in top_stable_windows:
+            for m in epoch_metrics[start:end]:
+                if m['val_auc'] > max_target_auc:
+                    max_target_auc = m['val_auc']
+                    best_state_dict = m['state_dict']
+                    best_epoch = m['epoch']
+    else:
+        best_metric = max(epoch_metrics, key=lambda x: x['val_auc'])
+        best_state_dict = best_metric['state_dict']
+        best_epoch = best_metric['epoch']
+
+    torch.save(best_state_dict, best_model_path)
+    print_log(f" 最佳模型已保存 (选自 Epoch {best_epoch}): {best_model_path}")
 
     # ==========================================
-    # 模型评估 (严格使用本折最优 AUC 的模型)
+    # 模型评估 (防数据泄露的动态阈值逻辑)
     # ==========================================
-    print_log(f"\n====== 加载 Fold {fold + 1} 的最强模型进行最终代表性评估 ======")
-    model.load_state_dict(torch.load(best_model_path))
+    print_log(f"\n====== 计算 Fold {fold + 1} 的无数据泄露动态阈值 ======")
+    model.load_state_dict(torch.load(best_model_path, map_location=device))
     model.eval()
     
+    # 1. 构造本折不带数据增强的纯净训练集 Loader
+    train_eval_set = MultimodalDataset(train_dataset_data, train_dataset_mask, train_labels, augment=False)
+    train_eval_loader = DataLoader(train_eval_set, batch_size=32, shuffle=False, collate_fn=collate_fn)
+
+    # 2. 在纯净训练集上收集概率分布并计算最佳阈值
+    train_eval_probs, train_eval_labels = [], []
+    with torch.no_grad():
+        for batch in train_eval_loader:
+            inputs = {
+                'data': {k: v.to(device) for k, v in batch['data'].items()},
+                'mask': {k: v.to(device) for k, v in batch['mask'].items()}
+            }
+            outputs = model(inputs).squeeze()
+            if outputs.dim() == 0: outputs = outputs.unsqueeze(0)
+            probs = torch.sigmoid(outputs).cpu().numpy()
+            train_eval_probs.extend(probs)
+            train_eval_labels.extend(batch['labels'].numpy())
+
+    fpr, tpr, thresholds = roc_curve(train_eval_labels, train_eval_probs)
+    best_idx = np.argmax(tpr - fpr)
+    fold_opt_thresh = thresholds[best_idx]
+    print_log(f"本折训练集推导最佳阈值: {fold_opt_thresh:.4f}")
+
+    # 3. 将该最佳阈值严格应用于验证集进行最终打分
     final_preds, final_labels = [], []
     with torch.no_grad():
         for batch in val_loader:
@@ -266,7 +319,8 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(np.zeros(len(full_labels))
     final_labels = np.array(final_labels)
     
     auc = roc_auc_score(final_labels, final_preds)
-    preds_binary = (final_preds >= 0.5).astype(int)
+    # 替换硬编码的 0.5，使用动态阈值
+    preds_binary = (final_preds >= fold_opt_thresh).astype(int)
     acc = accuracy_score(final_labels, preds_binary)
     pre = precision_score(final_labels, preds_binary, zero_division=0)
     rec = recall_score(final_labels, preds_binary, zero_division=0)
@@ -279,6 +333,7 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(np.zeros(len(full_labels))
     cv_metrics['pre'].append(pre)
     cv_metrics['rec'].append(rec)
     cv_metrics['f1'].append(f1)
+    cv_metrics['thresholds'].append(fold_opt_thresh)
 
 # ==========================================
 # 第三步：输出 10 折交叉验证的最终统计结果
@@ -286,9 +341,10 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(np.zeros(len(full_labels))
 print_log("\n" + "="*40)
 print_log("10-Fold Cross Validation Final Results:")
 print_log("="*40)
-print_log(f"AUC:       {np.mean(cv_metrics['auc']):.4f} ± {np.std(cv_metrics['auc']):.4f}")
-print_log(f"Accuracy:  {np.mean(cv_metrics['acc']):.4f} ± {np.std(cv_metrics['acc']):.4f}")
-print_log(f"Precision: {np.mean(cv_metrics['pre']):.4f} ± {np.std(cv_metrics['pre']):.4f}")
-print_log(f"Recall:    {np.mean(cv_metrics['rec']):.4f} ± {np.std(cv_metrics['rec']):.4f}")
-print_log(f"F1 Score:  {np.mean(cv_metrics['f1']):.4f} ± {np.std(cv_metrics['f1']):.4f}")
+print_log(f"AUC:           {np.mean(cv_metrics['auc']):.4f} ± {np.std(cv_metrics['auc']):.4f}")
+print_log(f"Accuracy:      {np.mean(cv_metrics['acc']):.4f} ± {np.std(cv_metrics['acc']):.4f}")
+print_log(f"Precision:     {np.mean(cv_metrics['pre']):.4f} ± {np.std(cv_metrics['pre']):.4f}")
+print_log(f"Recall:        {np.mean(cv_metrics['rec']):.4f} ± {np.std(cv_metrics['rec']):.4f}")
+print_log(f"F1 Score:      {np.mean(cv_metrics['f1']):.4f} ± {np.std(cv_metrics['f1']):.4f}")
+print_log(f"Avg Threshold: {np.mean(cv_metrics['thresholds']):.4f}")
 print_log("="*40)
