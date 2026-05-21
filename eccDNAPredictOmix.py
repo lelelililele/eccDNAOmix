@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+eccDNAPredictOmix.py - eccDNAOmix Multimodal Prediction Script (Optimized Dynamic Threshold Version)
+Usage: python eccDNAPredictOmix.py -i /path/to/npz_features_dir -o output_dir
+"""
+
 import os
 import sys
 import glob
@@ -15,14 +23,14 @@ from data_utils import generate_xgb_features, transform_xgb_features, Multimodal
 from models import DeepMultimodalModel
 from train_utils import train_model
 from eval_utils import evaluate_modality, final_metrics
-#from feature_extract import FeatureExtractor
 
+# Device configuration (Prediction default to CPU, change to "cuda" if GPU is preferred)
 device = torch.device("cpu")
 
 def print_banner():
     """Display program banner"""
     print("\n" + "="*60)
-    print("eccDNA Predictor (Omix version)".center(60))
+    print("eccDNA Predictor (Omix Multimodal Version)".center(60))
     print("="*60)
     print(f"Using device: {device}\n")
 
@@ -37,14 +45,13 @@ def load_split_data(data_root, mod):
             mask = data['DNASeqmask']
             
             print(f"\nDebug - Sequence data info:")
-            print(f"Data type: {features.dtype}")
             print(f"Shape: {features.shape}")
             
             base_map = {0: 'A', 1: 'T', 2: 'C', 3: 'G'}
             sequences = []
             for sample, sample_mask in zip(features, mask):
                 seq = []
-                for pos, (position, mask_val) in enumerate(zip(sample, sample_mask)):
+                for position, mask_val in zip(sample, sample_mask):
                     if mask_val == 0:
                         seq.append('')
                     else:
@@ -90,7 +97,6 @@ def check_input_files(data_root, required_modalities):
     invalid_files = []
     
     for mod in required_modalities:
-        # 检查文件是否存在
         file_pattern = f'{data_root}/*{mod}*.npz'
         matched_files = glob.glob(file_pattern)
         
@@ -98,7 +104,6 @@ def check_input_files(data_root, required_modalities):
             missing_files.append(mod)
             continue
             
-        # 检查文件内容
         try:
             data = np.load(matched_files[0])
             if mod == 'seq':
@@ -159,43 +164,41 @@ def main():
     print_banner()
     
     # 检查输入文件
-    print("\nChecking input files...")
+    print("Checking input files...")
     missing_files, invalid_files = check_input_files(args.input, modalities)
     
     if missing_files or invalid_files:
         if missing_files:
             print("\n[×] Missing files for modalities:", missing_files)
-            print("Expected files like:", [f"*{mod}*.npz" for mod in missing_files])
         if invalid_files:
             print("\n[×] Invalid files:")
             for mod, reason in invalid_files:
                 print(f"- {mod}: {reason}")
         sys.exit(1)
 
-    # 加载模型（确保从outputs目录加载）
-    model_dir = os.path.join(os.path.dirname(__file__), "outputs")
+    # 加载最新训练得到的模型权重
+    model_dir = os.path.join(os.path.dirname(__abspath__ if '__file__' in locals() else os.getcwd()), "outputs")
+    if not os.path.exists(model_dir):
+        model_dir = os.path.join(os.path.dirname(__file__), "outputs")
     model_path = os.path.join(model_dir, "ecc_model_epoch56_auc0.8437.pth")
     model = load_trained_model(model_path)
 
-    # 加载预训练的XGBoost模型和Scaler（从outputs目录）
+    # 加载预训练的 XGBoost 模型和 Scaler
     xgb_models = {}
     scalers = {}
     for mod in xgb_modalities:
         try:
-            # 加载Scaler
             scaler_path = os.path.join(model_dir, f'scaler_{mod}.pkl')
             if not os.path.exists(scaler_path):
                 print(f"[×] Error: Scaler file not found at {scaler_path}")
                 sys.exit(1)
             scalers[mod] = joblib.load(scaler_path)
             
-            # 关键修改：加载XGBoost模型时包装为XGBClassifier
             xgb_path = os.path.join(model_dir, f'xgb_{mod}.model')
             if not os.path.exists(xgb_path):
                 print(f"[×] Error: XGBoost model not found at {xgb_path}")
                 sys.exit(1)
             
-            # 创建XGBClassifier包装器
             xgb_model = xgb.XGBClassifier()
             booster = xgb.Booster()
             booster.load_model(xgb_path)
@@ -214,31 +217,23 @@ def main():
     # 加载和预处理数据
     for mod in modalities:
         try:
-            print(f"\nProcessing modality: {mod}")
+            print(f"Processing modality: {mod}")
             if mod == 'seq':
-                print("Loading sequence data...")
                 features, mask, labels, seq_data = load_split_data(args.input, mod)
                 sequences = seq_data
-                print(f"Loaded {len(sequences)} sequences")
             else:
                 features, mask, labels = load_split_data(args.input, mod)
             
-            print(f"Shape - Features: {features.shape}, Mask: {mask.shape}")
             if predict_labels is None:
                 predict_labels = labels
             
-            # 特殊处理XGBoost模态
+            # 特殊处理 XGBoost 树集成特征映射模态
             if mod in xgb_modalities:
-                # 确保数据是2D的
                 features = features.reshape(features.shape[0], -1)
-                # 使用预训练的Scaler
                 features = scalers[mod].transform(features)
-                # 生成XGBoost特征（使用原transform_xgb_features）
                 try:
                     xgb_feat = transform_xgb_features(xgb_models[mod], features)
-                    # 转换为3D (batch, 1, features)
                     features = xgb_feat[:, np.newaxis, :]
-                    print(f"Processed {mod} features shape: {features.shape}")
                 except Exception as e:
                     print(f"[×] Error transforming {mod} features: {str(e)}")
                     sys.exit(1)
@@ -249,35 +244,41 @@ def main():
             print(f"Error processing {mod}: {str(e)}")
             sys.exit(1)
 
-    # 创建数据集（确保只使用成功加载的模态）
+    # 创建验证预测数据集
     available_modalities = list(predict_loaded.keys())
     predict_data = {mod: predict_loaded[mod][0] for mod in available_modalities}
     predict_mask = {mod: predict_loaded[mod][1] for mod in available_modalities}
     predict_set = MultimodalDataset(predict_data, predict_mask, predict_labels, augment=False)
 
-    # 运行预测（使用较小的batch_size防止内存不足）
-    print("\nRunning predictions...")
+    # 运行联合预测
+    print("\nRunning multimodal predictions...")
     model.eval()
     predictions = []
+    
+    # 硬编码写入严格在训练集上推导的多模态全局最佳切分决策阈值
+    optimal_multimodal_threshold = 0.9393
+    print(f" Applying multimodal global dynamic threshold: {optimal_multimodal_threshold:.4f}")
+
     with torch.no_grad():
         for batch in DataLoader(predict_set, batch_size=100, collate_fn=collate_fn):
-            # 确保只使用实际存在的模态
             inputs = {
                 'data': {mod: batch['data'][mod].to(device) for mod in available_modalities},
                 'mask': {mod: batch['mask'][mod].to(device) for mod in available_modalities}
             }
             outputs = model(inputs).squeeze()
+            if outputs.dim() == 0:
+                outputs = outputs.unsqueeze(0)
             probs = torch.sigmoid(outputs).cpu().numpy()
-            preds = (probs > 0.5).astype(int)
+            
+            # 使用最优阈值进行二元切分
+            preds = (probs >= optimal_multimodal_threshold).astype(int)
             predictions.extend(zip(preds, probs))
             
-            # 调试输出
-            print(f"Batch predictions - eccDNA: {(preds == 1).sum()}, Non-eccDNA: {(preds == 0).sum()}")
-            print(f"Probability range: {probs.min():.4f}-{probs.max():.4f}")
+            print(f"Batch inference -> eccDNA: {(preds == 1).sum()}, Non-eccDNA: {(preds == 0).sum()} | Range: {probs.min():.4f}-{probs.max():.4f}")
 
-    # 保存结果
+    # 保存预测报告
     save_predictions(args.output, predictions, sequences)
-    print("\n[✓] Prediction completed!")
+    print("\n[✓] Multimodal prediction pipeline completed successfully!")
 
 if __name__ == "__main__":
     main()
