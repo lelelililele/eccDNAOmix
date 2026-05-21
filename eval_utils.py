@@ -1,13 +1,52 @@
 import torch
 import numpy as np
-# 添加 precision_score 和 recall_score 的导入
 from sklearn.metrics import accuracy_score, f1_score, roc_auc_score, roc_curve, precision_score, recall_score
 import matplotlib.pyplot as plt
 from config import ROC_FIGURE_PATH
 
+def find_optimal_threshold(model, modality_name, train_loader, modalities, device):
+    """
+    新增函数：在训练集上寻找无数据泄露的最佳阈值 (Youden's J statistic)
+    """
+    model.eval()
+    all_probs, all_labels = [], []
 
-def evaluate_modality(model, modality_name, data_loader, modalities, device):
-    """评估单个模态在激活时的独立全指标性能（响应审稿人2的要求）"""
+    with torch.no_grad():
+        for batch in train_loader:
+            labels = batch['labels'].cpu().numpy()
+
+            # 构建 mask：如果是单模态，仅激活指定模态；如果是 "all"，激活全部
+            if modality_name != "all":
+                mod_mask = {
+                    mod: (batch['mask'][mod] if mod == modality_name else torch.zeros_like(batch['mask'][mod]))
+                    for mod in modalities
+                }
+            else:
+                mod_mask = batch['mask']
+
+            inputs = {
+                'data': {mod: batch['data'][mod].to(device) for mod in modalities},
+                'mask': {mod: mod_mask[mod].to(device) for mod in modalities}
+            }
+
+            outputs = model(inputs).squeeze()
+            if outputs.dim() == 0:
+                outputs = outputs.unsqueeze(0)
+            probs = torch.sigmoid(outputs).cpu().numpy()
+
+            all_probs.extend(probs)
+            all_labels.extend(labels)
+
+    # 计算 Youden's J 统计量最大化时的阈值
+    fpr, tpr, thresholds = roc_curve(all_labels, all_probs)
+    j_scores = tpr - fpr
+    best_idx = np.argmax(j_scores)
+    best_threshold = thresholds[best_idx]
+    
+    return best_threshold
+
+def evaluate_modality(model, modality_name, data_loader, modalities, device, threshold=0.5):
+    """评估单个模态在激活时的独立全指标性能（支持自定义阈值）"""
     model.eval()
     all_probs, all_labels = [], []
 
@@ -27,6 +66,8 @@ def evaluate_modality(model, modality_name, data_loader, modalities, device):
             }
 
             outputs = model(inputs).squeeze()
+            if outputs.dim() == 0:
+                outputs = outputs.unsqueeze(0)
             probs = torch.sigmoid(outputs).cpu().numpy()
 
             all_probs.extend(probs)
@@ -35,25 +76,23 @@ def evaluate_modality(model, modality_name, data_loader, modalities, device):
     all_probs = np.array(all_probs)
     all_labels = np.array(all_labels)
     
-    # 采用 0.5 阈值进行预测
-    all_preds = (all_probs > 0.5).astype(int)
+    # 使用传入的最佳阈值
+    all_preds = (all_probs > threshold).astype(int)
 
-    # 计算审稿人要求的所有指标
     auc = roc_auc_score(all_labels, all_probs)
     acc = accuracy_score(all_labels, all_preds)
-    pre = precision_score(all_labels, all_preds)
-    rec = recall_score(all_labels, all_preds)
-    f1 = f1_score(all_labels, all_preds)
+    pre = precision_score(all_labels, all_preds, zero_division=0)
+    rec = recall_score(all_labels, all_preds, zero_division=0)
+    f1 = f1_score(all_labels, all_preds, zero_division=0)
 
-    # 打印该模态的详细指标，方便填表
-    print(f"--- Modality: {modality_name} ---")
+    print(f"--- Modality: {modality_name} (Threshold: {threshold:.4f}) ---")
     print(f"AUC: {auc:.4f}, Acc: {acc:.4f}, Precision: {pre:.4f}, Recall: {rec:.4f}, F1: {f1:.4f}")
     
     return auc, acc, pre, rec, f1
 
 
-def final_metrics(model, data_loader, modalities, device):
-    """多模态最终评估，包含审稿人要求的所有指标"""
+def final_metrics(model, data_loader, modalities, device, threshold=0.5):
+    """多模态最终评估（支持自定义阈值）"""
     model.eval()
     all_preds, all_probs, all_labels = [], [], []
 
@@ -66,8 +105,12 @@ def final_metrics(model, data_loader, modalities, device):
             }
 
             outputs = model(inputs).squeeze()
+            if outputs.dim() == 0:
+                outputs = outputs.unsqueeze(0)
             probs = torch.sigmoid(outputs).cpu().numpy()
-            preds = (probs > 0.5).astype(int)
+            
+            # 使用传入的最佳阈值
+            preds = (probs > threshold).astype(int)
 
             all_probs.extend(probs)
             all_preds.extend(preds)
@@ -77,21 +120,19 @@ def final_metrics(model, data_loader, modalities, device):
     all_preds = np.array(all_preds)
     all_labels = np.array(all_labels)
 
-    # 计算全面指标
     acc = accuracy_score(all_labels, all_preds)
-    pre = precision_score(all_labels, all_preds) # 新增
-    rec = recall_score(all_labels, all_preds)     # 新增
-    f1 = f1_score(all_labels, all_preds)
+    pre = precision_score(all_labels, all_preds, zero_division=0)
+    rec = recall_score(all_labels, all_preds, zero_division=0)
+    f1 = f1_score(all_labels, all_preds, zero_division=0)
     auc = roc_auc_score(all_labels, all_probs)
 
-    print("\n====== Final Validation Results (Multimodal) ======")
+    print(f"\n====== Final Validation Results (Multimodal) (Threshold: {threshold:.4f}) ======")
     print(f"Accuracy: {acc:.4f}")
-    print(f"Precision: {pre:.4f}") # 新增打印
-    print(f"Recall: {rec:.4f}")    # 新增打印
+    print(f"Precision: {pre:.4f}") 
+    print(f"Recall: {rec:.4f}")    
     print(f"F1 Score: {f1:.4f}")
     print(f"AUC-ROC : {auc:.4f}")
 
-    # 绘制 ROC 曲线保持不变
     fpr, tpr, _ = roc_curve(all_labels, all_probs)
     plt.figure(figsize=(8, 6))
     plt.plot(fpr, tpr, label=f'AUC = {auc:.4f}')
@@ -105,4 +146,4 @@ def final_metrics(model, data_loader, modalities, device):
 
     print(f"ROC curve saved to: {ROC_FIGURE_PATH}")
 
-    return acc, pre, rec, f1, auc # 更新返回列表
+    return acc, pre, rec, f1, auc
