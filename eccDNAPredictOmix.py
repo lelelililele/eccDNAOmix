@@ -174,7 +174,7 @@ def main():
 
     # 加载模型（确保从outputs目录加载）
     model_dir = os.path.join(os.path.dirname(__file__), "outputs")
-    model_path = os.path.join(model_dir, "ecc_model_epoch37_auc0.8225.pth")
+    model_path = os.path.join(model_dir, "ecc_model_epoch56_auc0.8437.pth")
     model = load_trained_model(model_path)
 
     # 加载预训练的XGBoost模型和Scaler（从outputs目录）
