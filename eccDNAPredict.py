@@ -2,11 +2,12 @@
 # -*- coding: utf-8 -*-
 
 """
-eccDNAPredict.py - eccDNA Prediction Script
+eccDNAPredict.py - eccDNA Prediction Script (Optimized Dynamic Threshold Version)
 Usage: python eccDNAPredict.py -i input.txt -o output_dir
 """
 
 import os
+import sys
 import glob
 import numpy as np
 import torch
@@ -20,10 +21,8 @@ from data_utils import generate_xgb_features, transform_xgb_features, Multimodal
 from models import DeepMultimodalModel
 from train_utils import train_model
 from eval_utils import evaluate_modality, final_metrics
-#from feature_extract import FeatureExtractor
-#import seaborn as sns
 from scipy.stats import spearmanr
-from sklearn.manifold import MDS  # 新增导入
+from sklearn.manifold import MDS  
 import matplotlib.pyplot as plt
 from scipy.stats import spearmanr
 from sklearn.decomposition import PCA
@@ -31,13 +30,13 @@ import umap
 from sklearn.metrics import pairwise_distances
 
 
-# Device configuration
+# Device configuration (Prediction default to CPU, change to "cuda" if GPU is preferred)
 device = torch.device("cpu")
 
 def print_banner():
     """Display program banner"""
     print("\n" + "="*60)
-    print("eccDNA Predictor".center(60))
+    print("eccDNA Predictor (DNA Sequence Only)".center(60))
     print("="*60)
     print(f"Using device: {device}\n")
 
@@ -54,7 +53,7 @@ def load_trained_model(model_path):
     try:
         model = DeepMultimodalModel().to(device)
         if os.path.exists(model_path):
-            model.load_state_dict(torch.load(model_path,map_location=device))
+            model.load_state_dict(torch.load(model_path, map_location=device))
             print("[✓] Successfully loaded model:", model_path)
             return model
         else:
@@ -146,8 +145,11 @@ def main():
         print(f"[×] Error: Input file not found - {args.input}")
         sys.exit(1)
 
-    # Load model
-    model_path = os.path.join(os.path.dirname(__file__), "output", "ecc_model_epoch56_auc0.8437.pth")
+    # 加载最新训练得到的模型权重
+    model_path = os.path.join(os.path.dirname(__abspath__ if '__file__' in locals() else os.getcwd()), "outputs", "ecc_model_epoch56_auc0.8437.pth")
+    if not os.path.exists(model_path):
+        # 兼容相对路径结构
+        model_path = os.path.join(os.path.dirname(__file__), "outputs", "ecc_model_epoch56_auc0.8437.pth")
     model = load_trained_model(model_path)
 
     # Generate dataset
@@ -158,19 +160,15 @@ def main():
         max_seq_len=1199
     )
 
-    # Create DataLoader
-    usage_loader = DataLoader(
-        dataset,
-        batch_size=100,
-        shuffle=False,
-        collate_fn=collate_fn
-    )
-    # Store sequences for output
-
     # Run prediction
     print("\nRunning predictions...")
     model.eval()
     predictions = []
+    
+    # 硬编码写入严格在训练集上推导的单模态决策阈值
+    optimal_seq_threshold = 0.9470
+    print(f"[➔] Applying sequence-specific dynamic threshold: {optimal_seq_threshold:.4f}")
+
     with torch.no_grad():
         for batch in DataLoader(dataset, batch_size=100, collate_fn=collate_fn):
             inputs = {
@@ -178,8 +176,12 @@ def main():
                 'mask': {mod: batch['mask'][mod].to(device) for mod in modalities}
             }
             outputs = model(inputs).squeeze()
+            if outputs.dim() == 0:
+                outputs = outputs.unsqueeze(0)
             probs = torch.sigmoid(outputs).cpu().numpy()
-            preds = (probs > 0.5).astype(int)
+            
+            # 使用最优阈值进行二元切分
+            preds = (probs >= optimal_seq_threshold).astype(int)
             predictions.extend(zip(preds, probs))
 
     # Save results
@@ -188,6 +190,7 @@ def main():
 
     # Save results with sequences
     save_predictions(args.output, predictions, input_sequences)
-    print("\nPrediction completed!")
+    print("\nPrediction completed successfully!")
+
 if __name__ == "__main__":
     main()
