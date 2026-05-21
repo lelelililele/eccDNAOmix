@@ -48,7 +48,7 @@ def load_modality_data(neg_path, pos_path, neg_data_key, neg_mask_key, pos_data_
 
     return scaled_data, combined_mask
 
-#xGBoost 特征
+# XGBoost 特征
 def generate_xgb_features(modality_name, X_train, X_val, y_train, n_features=32):
     from xgboost import XGBClassifier
     xgb = XGBClassifier(n_estimators=150, max_depth=5, learning_rate=0.1, subsample=0.8, n_jobs=8)
@@ -72,12 +72,7 @@ def build_sparse_features(leaves, n_features):
     features = csr_matrix((data, (rows, cols)), shape=(len(indices), n_features))
     return features.toarray()
 
-
-
-
-
-
-#数据增强
+# 数据增强
 def augment_sequence(sequence, mask_prob=0.3, dropout_prob=0.3, jitter_prob=0.15):
     seq = sequence.copy()
 
@@ -125,7 +120,7 @@ class MultimodalDataset(Dataset):
     def __len__(self):
         return len(self.labels)
 
-#  collate_fn
+# collate_fn
 def collate_fn(batch):
     collated = {'data': {}, 'mask': {}, 'labels': []}
 
@@ -144,7 +139,7 @@ def collate_fn(batch):
         data = np.stack(collated['data'][mod])
         mask = np.stack(collated['mask'][mod])
 
-        if mod in ['DNA6mA', 'methylation', 'expression']:
+        if mod in ['DNA6mA', 'methylation', 'expression', 'm6a']:
             data = data.reshape(data.shape[0], 1, -1)
             mask = np.ones_like(data)
             data = data.transpose(0, 2, 1)
