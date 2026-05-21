@@ -138,7 +138,10 @@ class DeepMultimodalModel(nn.Module):
 
         self.snp_net = SparseModalityNet(1)
         self.variant_net = SparseModalityNet(2)
-        self.m6a_net = SparseModalityNet(1)
+        
+        # ====== 【修改部分】将 m6a_net 改为支持 32 通道的 XGBoost 特征网络 ======
+        self.m6a_net = SparseModalityNet(32, is_xgb=True)
+        
         self.DNA6mA_net = SparseModalityNet(32, is_xgb=True)
         self.methylation_net = SparseModalityNet(32, is_xgb=True)
         self.expression_net = SparseModalityNet(32, is_xgb=True)
