@@ -63,4 +63,4 @@ modality_keys = {
 
 modalities = ['seq', 'snp', 'variant', 'methylation', 'expression', 'm6a', 'DNA6mA']
 
-xgb_modalities = ['DNA6mA', 'methylation', 'expression']
+xgb_modalities = ['DNA6mA', 'methylation','m6a', 'expression']
