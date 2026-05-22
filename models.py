@@ -97,7 +97,6 @@ class SparseModalityNet(nn.Module):
             )
             self.fc = nn.Linear(16, feature_dim)
         else:
-            # 【修改处 1】去掉了结尾的 nn.AdaptiveMaxPool1d(1)，保留空间序列长度
             self.feature_extractor = nn.Sequential(
                 ResBlock(in_channels, 16),
                 nn.MaxPool1d(2),
@@ -122,7 +121,6 @@ class SparseModalityNet(nn.Module):
             x = x.permute(0, 2, 1) # 形状变为 (batch, seq_len, 32)
             x = self.pos_encoder(x)
             x = self.transformer(x)
-            # 【修改处 2】Transformer 充分计算 Attention 后，对序列维度取平均，得到最终的特征向量
             return x.mean(dim=1) 
 
 # 主模型
