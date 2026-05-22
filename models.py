@@ -97,11 +97,11 @@ class SparseModalityNet(nn.Module):
             )
             self.fc = nn.Linear(16, feature_dim)
         else:
+            # 【修改处 1】去掉了结尾的 nn.AdaptiveMaxPool1d(1)，保留空间序列长度
             self.feature_extractor = nn.Sequential(
                 ResBlock(in_channels, 16),
                 nn.MaxPool1d(2),
-                ResBlock(16, 32),
-                nn.AdaptiveMaxPool1d(1)
+                ResBlock(16, 32)
             )
             encoder_layer = nn.TransformerEncoderLayer(
                 d_model=32,
@@ -119,9 +119,11 @@ class SparseModalityNet(nn.Module):
             return self.fc(x)
         else:
             x = self.feature_extractor(x)
-            x = x.permute(0, 2, 1)
+            x = x.permute(0, 2, 1) # 形状变为 (batch, seq_len, 32)
             x = self.pos_encoder(x)
-            return self.transformer(x).squeeze(1)
+            x = self.transformer(x)
+            # 【修改处 2】Transformer 充分计算 Attention 后，对序列维度取平均，得到最终的特征向量
+            return x.mean(dim=1) 
 
 # 主模型
 class DeepMultimodalModel(nn.Module):
@@ -138,9 +140,7 @@ class DeepMultimodalModel(nn.Module):
 
         self.snp_net = SparseModalityNet(1)
         self.variant_net = SparseModalityNet(2)
-
-        self.m6a_net = SparseModalityNet(32, is_xgb=True)
-        
+        self.m6a_net = SparseModalityNet(32, is_xgb=True)        
         self.DNA6mA_net = SparseModalityNet(32, is_xgb=True)
         self.methylation_net = SparseModalityNet(32, is_xgb=True)
         self.expression_net = SparseModalityNet(32, is_xgb=True)
