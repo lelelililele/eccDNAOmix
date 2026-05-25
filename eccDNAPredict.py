@@ -126,7 +126,7 @@ def save_predictions(output_dir, predictions, sequences):
     os.makedirs(output_dir, exist_ok=True)
     output_file = os.path.join(output_dir, "predictions.txt")
     with open(output_file, 'w') as f:
-        f.write("SequenceID\tSequence\tPrediction\tProbability\n")
+        f.write("SequenceID\tSequence\tPrediction\tScore\n")
         for i, ((pred, prob), seq) in enumerate(zip(predictions, sequences)):
             f.write(f"{i+1}\t{seq}\t{'eccDNA' if pred else 'Non-eccDNA'}\t{prob:.4f}\n")
     print(f"[✓] Predictions saved to: {output_file}")
