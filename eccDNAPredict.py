@@ -166,7 +166,7 @@ def main():
     predictions = []
     
     # 硬编码写入严格在训练集上推导的单模态决策阈值
-    optimal_seq_threshold = 0.9470
+    optimal_seq_threshold = 0.2143
     print(f"[➔] Applying sequence-specific dynamic threshold: {optimal_seq_threshold:.4f}")
 
     with torch.no_grad():
