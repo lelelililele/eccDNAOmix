@@ -149,7 +149,7 @@ def save_predictions(output_dir, predictions, sequences=None):
     os.makedirs(output_dir, exist_ok=True)
     output_file = os.path.join(output_dir, "predictions.txt")
     with open(output_file, 'w') as f:
-        f.write("SampleID\tSequence\tPrediction\tProbability\n")
+        f.write("SampleID\tSequence\tPrediction\tScore\n")
         for i, (pred, prob) in enumerate(predictions):
             seq = sequences[i] if sequences else "N/A"
             f.write(f"{i+1}\t{seq}\t{'eccDNA' if pred else 'Non-eccDNA'}\t{prob:.4f}\n")
