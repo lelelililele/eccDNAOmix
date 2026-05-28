@@ -168,7 +168,7 @@ Each line is an independent sequence.
 
 
 The prediction file was like:  
-|SequenceID|Sequence|Prediction|Probability|
+|SequenceID|Sequence|Prediction|Score|
 |----------|--------|----------|-----------|
 |1         |ATCG... |Non-eccDNA|0.0942     |  
 |2         |GCTA... |Non-eccDNA|0.0896     |
