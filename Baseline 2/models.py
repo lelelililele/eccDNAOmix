@@ -183,12 +183,15 @@ class DeepMultimodalModel(nn.Module):
 class MLPModalityNet(nn.Module):
     def __init__(self, in_features=32, out_features=32):
         super().__init__()
+        # Standard End-to-End MLP
         self.mlp = nn.Sequential(
-            nn.Linear(in_features, 16),
-            nn.ReLU(),
-            nn.Dropout(0.4),
-            nn.Linear(16, out_features),
-            nn.ReLU()
+            nn.Linear(in_features, 64),
+            nn.BatchNorm1d(64),
+            nn.LeakyReLU(0.1),
+            nn.Dropout(0.3),
+            nn.Linear(64, out_features),
+            nn.BatchNorm1d(out_features),
+            nn.LeakyReLU(0.1)
         )
 
     def forward(self, x):
@@ -208,6 +211,7 @@ class BaselineLRMLPModel(nn.Module):
             ResBlock(64, 128),
             nn.AdaptiveMaxPool1d(1)
         )
+
         self.snp_net = MLPModalityNet(in_features=32, out_features=32)
         self.variant_net = MLPModalityNet(in_features=32, out_features=32)
         self.m6a_net = MLPModalityNet(in_features=32, out_features=32)
@@ -248,3 +252,40 @@ class BaselineLRMLPModel(nn.Module):
         }
         merged = self.gated_fusion(features)
         return self.classifier(merged)
+
+# ==========================================
+# NEW: Baseline MLP with strict information bottleneck (Bottleneck Global E2E MLP)
+# ==========================================
+class GlobalMLPBaselineModel(nn.Module):
+    def __init__(self, hidden_dim=32):
+        super().__init__()
+        self.mlp = None 
+        self.hidden_dim = hidden_dim
+        
+    def forward(self, x):
+        batch_size = x['data']['seq'].size(0)
+        flat_features = []
+        
+        # Iterate through all modalities and flatten
+        for mod in ['seq', 'snp', 'variant', 'methylation', 'expression', 'm6a', 'DNA6mA']:
+            feat = x['data'][mod]
+            mask = x['mask'][mod]
+            try:
+                masked_feat = feat * mask
+            except:
+                masked_feat = feat
+            flat_features.append(masked_feat.reshape(batch_size, -1))
+        
+        concat_feat = torch.cat(flat_features, dim=1)
+        
+        if self.mlp is None:
+            in_features = concat_feat.size(1)
+            self.mlp = nn.Sequential(
+                nn.Linear(in_features, self.hidden_dim),
+                nn.BatchNorm1d(self.hidden_dim),
+                nn.ReLU(),
+                nn.Dropout(0.5), # Retain Dropout 
+                nn.Linear(self.hidden_dim, 1)
+            ).to(concat_feat.device)
+            
+        return self.mlp(concat_feat)
