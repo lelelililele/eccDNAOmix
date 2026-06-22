@@ -1,7 +1,7 @@
 import os
 import subprocess
 
-# 基础路径定义
+# Base path definition
 base_dir = "*/Multimodal_deeplearning"
 
 
@@ -60,11 +60,11 @@ modality_config = {
 tissues = ['N', 'T']
 
 def run_command(cmd):
-    print(f"  正在执行命令: {cmd}")
+    print(f"  Executing command: {cmd}")
     try:
         subprocess.run(cmd, shell=True, check=True)
     except subprocess.CalledProcessError as e:
-        print(f"  [错误] 脚本执行失败: {e}")
+        print(f"  [Error] Script execution failed: {e}")
 
 def get_file_list(patients, tissue_types, folder, suffix):
     file_list = []
@@ -81,7 +81,7 @@ def main():
     for test_p in all_patients:
         split_dir = os.path.join(base_dir, f"split_data{test_p}")
         
-        # 1. 创建目录结构
+        # 1. Create directory structure
         subdirs = [
             "test/positive", "test/negative",
             "train/positive", "train/negative"
@@ -89,9 +89,9 @@ def main():
         for sub in subdirs:
             os.makedirs(os.path.join(split_dir, sub), exist_ok=True)
             
-        print(f"\n========== 正在生成第 {test_p} 号个体的划分集 (split_data{test_p}) ==========")
+        print(f"\n========== Generating split set for individual {test_p} (split_data{test_p}) ==========")
         
-        # 划分训练患者和测试患者
+        # Partition training patients and test patients
         train_patients = [p for p in all_patients if p != test_p]
         test_patients = [test_p] 
         
@@ -102,29 +102,29 @@ def main():
             pos_suffix = config["pos_suffix"]
             neg_suffix = config["neg_suffix"]
             
-            print(f"\n---> 正在处理模态: {mod_name}")
+            print(f"\n---> Processing modality: {mod_name}")
             
-            # ================= 2. 处理训练集 (Train) =================
-            # 训练集正样本 (Train Positive) -> 调用 pos_script
+            # ================= 2. Process Training Set (Train) =================
+            # Train Positive -> Call pos_script
             train_pos_inputs = get_file_list(train_patients, tissues, folder, pos_suffix)
             train_pos_out = os.path.join(split_dir, "train", "positive", f"pos_train_{mod_name}.npz")
             cmd_train_pos = f"python {pos_script} -i {' '.join(train_pos_inputs)} -o {train_pos_out}"
             run_command(cmd_train_pos)
             
-            # 训练集负样本 (Train Negative) -> 调用 neg_script
+            # Train Negative -> Call neg_script
             train_neg_inputs = get_file_list(train_patients, tissues, folder, neg_suffix)
             train_neg_out = os.path.join(split_dir, "train", "negative", f"neg_train_{mod_name}.npz")
             cmd_train_neg = f"python {neg_script} -i {' '.join(train_neg_inputs)} -o {train_neg_out}"
             run_command(cmd_train_neg)
             
-            # ================= 3. 处理测试集 (Test) =================
-            # 测试集正样本 (Test Positive) -> 调用 pos_script
+            # ================= 3. Process Test Set (Test) =================
+            # Test Positive -> Call pos_script
             test_pos_inputs = get_file_list(test_patients, tissues, folder, pos_suffix)
             test_pos_out = os.path.join(split_dir, "test", "positive", f"pos_test_{mod_name}.npz")
             cmd_test_pos = f"python {pos_script} -i {' '.join(test_pos_inputs)} -o {test_pos_out}"
             run_command(cmd_test_pos)
             
-            # 测试集负样本 (Test Negative) -> 调用 neg_script
+            # Test Negative -> Call neg_script
             test_neg_inputs = get_file_list(test_patients, tissues, folder, neg_suffix)
             test_neg_out = os.path.join(split_dir, "test", "negative", f"neg_test_{mod_name}.npz")
             cmd_test_neg = f"python {neg_script} -i {' '.join(test_neg_inputs)} -o {test_neg_out}"
