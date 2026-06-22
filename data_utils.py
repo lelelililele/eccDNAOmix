@@ -4,7 +4,7 @@ from scipy.sparse import csr_matrix
 from torch.utils.data import Dataset
 import torch
 
-# 数据加载
+# Data loading
 def load_modality_data(neg_path, pos_path, neg_data_key, neg_mask_key, pos_data_key, pos_mask_key):
     neg_data = np.load(neg_path)[neg_data_key]
     neg_mask = np.load(neg_path)[neg_mask_key]
@@ -48,7 +48,7 @@ def load_modality_data(neg_path, pos_path, neg_data_key, neg_mask_key, pos_data_
 
     return scaled_data, combined_mask
 
-# XGBoost 特征
+# XGBoost features
 def generate_xgb_features(modality_name, X_train, X_val, y_train, n_features=32):
     from xgboost import XGBClassifier
     xgb = XGBClassifier(n_estimators=150, max_depth=5, learning_rate=0.1, subsample=0.8, n_jobs=8)
@@ -72,21 +72,14 @@ def build_sparse_features(leaves, n_features):
     features = csr_matrix((data, (rows, cols)), shape=(len(indices), n_features))
     return features.toarray()
 
-# 数据增强
 def augment_sequence(sequence, mask_prob=0.3, dropout_prob=0.3, jitter_prob=0.15):
     seq = sequence.copy()
-
-    # 1. 随机掩码
     if np.random.rand() < mask_prob:
         mask_idx = np.random.choice(seq.shape[1], size=int(0.05 * seq.shape[1]), replace=False)
         seq[:, mask_idx] = 0
-
-    # 2. Dropout 位点
     if np.random.rand() < dropout_prob:
         drop_idx = np.random.choice(seq.shape[1], size=int(0.05 * seq.shape[1]), replace=False)
         seq[:, drop_idx] = 0
-
-    # 3. 位置扰动
     if np.random.rand() < jitter_prob:
         for i in range(seq.shape[1] - 1):
             if np.random.rand() < 0.01:
@@ -94,7 +87,7 @@ def augment_sequence(sequence, mask_prob=0.3, dropout_prob=0.3, jitter_prob=0.15
 
     return seq
 
-# 数据集类
+# Dataset class
 class MultimodalDataset(Dataset):
     def __init__(self, modalities_data, modalities_mask, labels, augment=False):
         self.modalities_data = modalities_data
@@ -107,8 +100,6 @@ class MultimodalDataset(Dataset):
         for mod in self.modalities_data.keys():
             data = self.modalities_data[mod][index]
             mask = self.modalities_mask[mod][index]
-
-            # 数据增强，仅对 seq/snp 训练数据
             if self.augment and mod in ['seq', 'snp']:
                 data = augment_sequence(data)
 
