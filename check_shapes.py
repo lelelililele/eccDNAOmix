@@ -8,7 +8,7 @@ base_dirs = {
     "negative": "split_data/train/negative"
             }
 
-print("\n=== 检查 split_data/train 各模态数据 shape ===\n")
+print("\n=== Checking shape of each modality in split_data/train ===\n")
 
 for label_type, folder in base_dirs.items():
     print(f"\n--- {label_type.upper()} ---")
