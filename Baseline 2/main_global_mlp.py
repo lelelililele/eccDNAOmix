@@ -7,11 +7,9 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import roc_auc_score, accuracy_score, precision_score, recall_score, f1_score
-
 from config import modality_keys, modalities, xgb_modalities, OUTPUT_DIR
 from data_utils import MultimodalDataset, collate_fn
 from models import GlobalMLPBaselineModel
-# 已经彻底移除了 find_optimal_threshold
 from eval_utils import evaluate_modality, final_metrics 
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -47,7 +45,6 @@ scaler_dict = {}
 for mod in modalities:
     data, mask, labels = load_split_data(mod, split='train')
     
-    # 对于定量数据，只做基础的均值方差归一化
     if mod in xgb_modalities:
         scaler = StandardScaler()
         data = data.reshape(data.shape[0], -1)
@@ -89,7 +86,6 @@ test_loader = DataLoader(test_set, batch_size=32, shuffle=False, collate_fn=coll
 # ==========================================
 model = GlobalMLPBaselineModel().to(device)
 
-# 核心技巧：执行一次 Dummy Forward 生成网络参数
 model.train()
 for dummy_batch in train_loader:
     dummy_inputs = {
@@ -145,10 +141,7 @@ for epoch in range(num_epochs):
         
     train_loss /= len(train_loader.dataset)
     train_auc = roc_auc_score(train_targets, train_probs)
-    
-    # 强制使用 0.5 固定阈值
-    train_preds = (np.array(train_probs) > 0.5).astype(int)
-    
+    train_preds = (np.array(train_probs) > 0.5).astype(int)    
     train_acc = accuracy_score(train_targets, train_preds)
     train_pre = precision_score(train_targets, train_preds, zero_division=0)
     train_rec = recall_score(train_targets, train_preds, zero_division=0)
@@ -179,17 +172,14 @@ for epoch in range(num_epochs):
             
     val_loss /= len(test_loader.dataset)
     val_auc = roc_auc_score(val_targets, val_probs)
-    
-    # 强制使用 0.5 固定阈值
-    val_preds = (np.array(val_probs) > 0.5).astype(int)
-    
+    val_preds = (np.array(val_probs) > 0.5).astype(int)  
     val_acc = accuracy_score(val_targets, val_preds)
     val_pre = precision_score(val_targets, val_preds, zero_division=0)
     val_rec = recall_score(val_targets, val_preds, zero_division=0)
     val_f1 = f1_score(val_targets, val_preds, zero_division=0)
 
     # 打印包含 Pre 和 Rec 的所有指标
-    print(f"Epoch {epoch+1}/{num_epochs} (Fixed Threshold: 0.5)")
+    print(f"Epoch {epoch+1}/{num_epochs} 
     print(f"  Train -> Loss: {train_loss:.4f} | AUC: {train_auc:.4f} | Acc: {train_acc:.4f} | Pre: {train_pre:.4f} | Rec: {train_rec:.4f} | F1: {train_f1:.4f}")
     print(f"  Val   -> Loss: {val_loss:.4f} | AUC: {val_auc:.4f} | Acc: {val_acc:.4f} | Pre: {val_pre:.4f} | Rec: {val_rec:.4f} | F1: {val_f1:.4f}")
 
@@ -216,14 +206,13 @@ for epoch in range(num_epochs):
     print("-" * 60)
 
 # ==========================================
-# 5. 训练完成后评估 (固定 0.5 阈值)
+# 5. 训练完成后评估
 # ==========================================
 if best_model_filename:
     print(f"\n加载 Global MLP 最优权重进行最终评估: {best_model_filename}")
     model.load_state_dict(torch.load(os.path.join(OUTPUT_DIR, best_model_filename), map_location=device))
 
-print("\n====== Global MLP 最终评估（测试集，固定阈值 0.5） ======")
-# 直接传入 threshold=0.5
+print("\n====== Global MLP 最终评估 ======")
 acc, pre, rec, f1, auc = final_metrics(model, test_loader, modalities, device, threshold=0.5)
 
 final_metrics_dict = {
