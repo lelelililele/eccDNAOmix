@@ -92,7 +92,7 @@ def load_split_data(data_root, mod):
         sys.exit(1)
 
 def check_input_files(data_root, required_modalities):
-    """检查所有必需的数据文件是否存在且包含所需字段"""
+    """Check if all required data files exist and contain necessary fields"""
     missing_files = []
     invalid_files = []
     
@@ -163,7 +163,7 @@ def main():
 
     print_banner()
     
-    # 检查输入文件
+    # Check input files
     print("Checking input files...")
     missing_files, invalid_files = check_input_files(args.input, modalities)
     
@@ -176,14 +176,14 @@ def main():
                 print(f"- {mod}: {reason}")
         sys.exit(1)
 
-    # 加载最新训练得到的模型权重
+    # Load the latest trained model weights
     model_dir = os.path.join(os.path.dirname(__abspath__ if '__file__' in locals() else os.getcwd()), "outputs")
     if not os.path.exists(model_dir):
         model_dir = os.path.join(os.path.dirname(__file__), "outputs")
     model_path = os.path.join(model_dir, "ecc_model_epoch56_auc0.8437.pth")
     model = load_trained_model(model_path)
 
-    # 加载预训练的 XGBoost 模型和 Scaler
+    # Load pretrained XGBoost models and Scalers
     xgb_models = {}
     scalers = {}
     for mod in xgb_modalities:
@@ -214,7 +214,7 @@ def main():
     predict_labels = None
     sequences = None
 
-    # 加载和预处理数据
+    # Load and preprocess data
     for mod in modalities:
         try:
             print(f"Processing modality: {mod}")
@@ -227,7 +227,7 @@ def main():
             if predict_labels is None:
                 predict_labels = labels
             
-            # 特殊处理 XGBoost 树集成特征映射模态
+            # Special handling for XGBoost tree ensemble feature mapping modality
             if mod in xgb_modalities:
                 features = features.reshape(features.shape[0], -1)
                 features = scalers[mod].transform(features)
@@ -244,18 +244,18 @@ def main():
             print(f"Error processing {mod}: {str(e)}")
             sys.exit(1)
 
-    # 创建验证预测数据集
+    # Create validation prediction dataset
     available_modalities = list(predict_loaded.keys())
     predict_data = {mod: predict_loaded[mod][0] for mod in available_modalities}
     predict_mask = {mod: predict_loaded[mod][1] for mod in available_modalities}
     predict_set = MultimodalDataset(predict_data, predict_mask, predict_labels, augment=False)
 
-    # 运行联合预测
+    # Run joint predictions
     print("\nRunning multimodal predictions...")
     model.eval()
     predictions = []
     
-    # 硬编码写入严格在训练集上推导的多模态全局最佳切分决策阈值
+    # Hardcode the multimodal global optimal decision threshold strictly derived from the training set
     optimal_multimodal_threshold = 0.9393
     print(f" Applying multimodal global dynamic threshold: {optimal_multimodal_threshold:.4f}")
 
@@ -270,13 +270,13 @@ def main():
                 outputs = outputs.unsqueeze(0)
             probs = torch.sigmoid(outputs).cpu().numpy()
             
-            # 使用最优阈值进行二元切分
+            # Use the optimal threshold for binary classification
             preds = (probs >= optimal_multimodal_threshold).astype(int)
             predictions.extend(zip(preds, probs))
             
             print(f"Batch inference -> eccDNA: {(preds == 1).sum()}, Non-eccDNA: {(preds == 0).sum()} | Range: {probs.min():.4f}-{probs.max():.4f}")
 
-    # 保存预测报告
+    # Save prediction report
     save_predictions(args.output, predictions, sequences)
     print("\n[✓] Multimodal prediction pipeline completed successfully!")
 
