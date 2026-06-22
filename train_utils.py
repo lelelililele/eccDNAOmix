@@ -106,7 +106,7 @@ def train_model(
             no_improve_epochs = 0
             model_path = os.path.join(save_dir, f"{base_model_name}_epoch{epoch+1}_auc{val_auc:.4f}.pth")
             torch.save(model.state_dict(), model_path)
-            print(f" ✅ 新最佳模型已保存: {model_path}")
+            print(f" ✅ New best model saved: {model_path}")
         else:
             no_improve_epochs += 1
             if no_improve_epochs >= patience:
