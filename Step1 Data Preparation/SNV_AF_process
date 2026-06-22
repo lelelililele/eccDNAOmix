@@ -1,7 +1,6 @@
 bcftools index N1.filtered_PASS.vcf.gz
 bcftools merge -o merged.vcf -O v N1.filtered_PASS.vcf.gz  N2.filtered_PASS.vcf.gz  N3.filtered_PASS.vcf.gz N4.filtered_PASS.vcf.gz  N5.filtered_PASS.vcf.gz
-#取VCF文件中的AF列进行构建index
-#(R4.4) [zhanglili@workstation ]$R
+#$R
 #library(VariantAnnotation)
 #vcf <- readVcf("merged.vcf", "hg38")  
 #write.table(geno(vcf)$AF,"Mutation_AF",quote=F,sep="\t")
