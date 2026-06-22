@@ -145,10 +145,10 @@ def main():
         print(f"[×] Error: Input file not found - {args.input}")
         sys.exit(1)
 
-    # 加载最新训练得到的模型权重
+    # Load the latest trained model weights
     model_path = os.path.join(os.path.dirname(__abspath__ if '__file__' in locals() else os.getcwd()), "outputs", "ecc_model_epoch56_auc0.8437.pth")
     if not os.path.exists(model_path):
-        # 兼容相对路径结构
+        # Compatible with relative path structure
         model_path = os.path.join(os.path.dirname(__file__), "outputs", "ecc_model_epoch56_auc0.8437.pth")
     model = load_trained_model(model_path)
 
@@ -165,7 +165,7 @@ def main():
     model.eval()
     predictions = []
     
-    # 硬编码写入严格在训练集上推导的单模态决策阈值
+    # Hardcode the single-modality decision threshold strictly derived from the training set
     optimal_seq_threshold = 0.2143
     print(f"[➔] Applying sequence-specific dynamic threshold: {optimal_seq_threshold:.4f}")
 
@@ -180,7 +180,7 @@ def main():
                 outputs = outputs.unsqueeze(0)
             probs = torch.sigmoid(outputs).cpu().numpy()
             
-            # 使用最优阈值进行二元切分
+            # Use the optimal threshold for binary classification
             preds = (probs >= optimal_seq_threshold).astype(int)
             predictions.extend(zip(preds, probs))
 
