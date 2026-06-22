@@ -36,7 +36,7 @@ def load_split_data(mod, split='train'):
     return features, masks, labels
 
 # ==========================================
-# 1. 数据准备 (训练集) - 纯粹端到端，不用 XGB/LR
+# 1. Data Preparation (Training Set) - Pure End-to-End, without XGB/LR
 # ==========================================
 train_loaded = {}
 train_labels = None
@@ -61,7 +61,7 @@ train_set = MultimodalDataset(train_data, train_mask, train_labels, augment=True
 train_loader = DataLoader(train_set, batch_size=32, shuffle=True, collate_fn=collate_fn)
 
 # ==========================================
-# 2. 数据准备 (测试集)
+# 2. Data Preparation (Test Set)
 # ==========================================
 test_loaded = {}
 test_labels = None
@@ -82,7 +82,7 @@ test_set = MultimodalDataset(test_data, test_mask, test_labels, augment=False)
 test_loader = DataLoader(test_set, batch_size=32, shuffle=False, collate_fn=collate_fn)
 
 # ==========================================
-# 3. 初始化全局 MLP 模型
+# 3. Initialize Global MLP Model
 # ==========================================
 model = GlobalMLPBaselineModel().to(device)
 
@@ -107,10 +107,10 @@ patience_counter = 0
 base_model_name = "baseline_global_mlp"
 best_model_filename = ""
 
-print("\n开始执行 Global End-to-End MLP 训练流程...")
+print("\nStarting the Global End-to-End MLP training process...")
 
 # ==========================================
-# 4. 训练与验证循环
+# 4. Training and validation loop
 # ==========================================
 for epoch in range(num_epochs):
     model.train()
@@ -178,8 +178,8 @@ for epoch in range(num_epochs):
     val_rec = recall_score(val_targets, val_preds, zero_division=0)
     val_f1 = f1_score(val_targets, val_preds, zero_division=0)
 
-    # 打印包含 Pre 和 Rec 的所有指标
-    print(f"Epoch {epoch+1}/{num_epochs} 
+    # Print all metrics including Pre and Rec
+    print(f"Epoch {epoch+1}/{num_epochs}")
     print(f"  Train -> Loss: {train_loss:.4f} | AUC: {train_auc:.4f} | Acc: {train_acc:.4f} | Pre: {train_pre:.4f} | Rec: {train_rec:.4f} | F1: {train_f1:.4f}")
     print(f"  Val   -> Loss: {val_loss:.4f} | AUC: {val_auc:.4f} | Acc: {val_acc:.4f} | Pre: {val_pre:.4f} | Rec: {val_rec:.4f} | F1: {val_f1:.4f}")
 
@@ -195,24 +195,24 @@ for epoch in range(num_epochs):
             
         best_model_filename = f"{base_model_name}_epoch{epoch+1}_auc{best_val_auc:.4f}.pth"
         torch.save(model.state_dict(), os.path.join(OUTPUT_DIR, best_model_filename))
-        print(f"  新最佳 Global MLP 已保存: {best_model_filename}")
+        print(f"  New best Global MLP saved: {best_model_filename}")
     else:
         patience_counter += 1
         
     if patience_counter >= patience:
-        print(f"\n[Early Stopping] 验证集 AUC 未提升，停止训练。")
+        print(f"\n[Early Stopping] Validation AUC has not improved. Stopping training.")
         break
         
     print("-" * 60)
 
 # ==========================================
-# 5. 训练完成后评估
+# 5. Post-training evaluation
 # ==========================================
 if best_model_filename:
-    print(f"\n加载 Global MLP 最优权重进行最终评估: {best_model_filename}")
+    print(f"\nLoading optimal Global MLP weights for final evaluation: {best_model_filename}")
     model.load_state_dict(torch.load(os.path.join(OUTPUT_DIR, best_model_filename), map_location=device))
 
-print("\n====== Global MLP 最终评估 ======")
+print("\n====== Global MLP Final Evaluation ======")
 acc, pre, rec, f1, auc = final_metrics(model, test_loader, modalities, device, threshold=0.5)
 
 final_metrics_dict = {
