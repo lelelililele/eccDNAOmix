@@ -37,7 +37,7 @@ def load_split_data(mod, split='train'):
     return features, masks, labels
 
 # ==========================================
-# 1. 数据准备 (训练集) - 替换为 LR
+# 1. Data Preparation (Training Set) - Replaced with LR
 # ==========================================
 train_loaded = {}
 train_labels = None
@@ -50,20 +50,16 @@ for mod in modalities:
     if train_labels is None:
         train_labels = labels
     else:
-        assert np.all(train_labels == labels), f"{mod} train 标签不一致"
+        assert np.all(train_labels == labels), f"{mod} train labels are inconsistent"
 
-# 训练集 LR 特征处理
+# Training set LR feature processing
 lr_indices_dict = {}
 for mod in lr_modalities:
     X = train_loaded[mod][0]
     mask = train_loaded[mod][1]
     lr_feat, _, top_idx = generate_lr_features(X, X, train_labels, n_features=32)
-    
-    # --- 修复核心：如果原始特征少于 32 维（例如 TPM 只有 1 维），用 0 补齐 ---
     if lr_feat.shape[1] < 32:
-        lr_feat = np.pad(lr_feat, ((0, 0), (0, 32 - lr_feat.shape[1])), mode='constant')
-    # ------------------------------------------------------------------------
-        
+        lr_feat = np.pad(lr_feat, ((0, 0), (0, 32 - lr_feat.shape[1])), mode='constant')     
     lr_indices_dict[mod] = top_idx
     lr_feat = lr_feat[:, np.newaxis, :]
     train_loaded[mod] = (lr_feat, mask)
@@ -74,7 +70,7 @@ train_set = MultimodalDataset(train_data, train_mask, train_labels, augment=True
 train_loader = DataLoader(train_set, batch_size=32, shuffle=True, collate_fn=collate_fn)
 
 # ==========================================
-# 2. 数据准备 (测试集) - 替换为 LR
+# 2. Data Preparation (Test Set) - Replaced with LR
 # ==========================================
 test_loaded = {}
 test_labels = None
@@ -87,17 +83,13 @@ for mod in modalities:
     if test_labels is None:
         test_labels = labels
 
-# 测试集 LR 特征处理
+# Test set LR feature processing
 for mod in lr_modalities:
     X = test_loaded[mod][0]
     mask = test_loaded[mod][1]
     lr_feat = transform_lr_features(X, lr_indices_dict[mod])
-    
-    # --- 修复核心：测试集同样用 0 补齐 ---
-    if lr_feat.shape[1] < 32:
-        lr_feat = np.pad(lr_feat, ((0, 0), (0, 32 - lr_feat.shape[1])), mode='constant')
-    # ------------------------------------
-        
+        if lr_feat.shape[1] < 32:
+        lr_feat = np.pad(lr_feat, ((0, 0), (0, 32 - lr_feat.shape[1])), mode='constant')  
     lr_feat = lr_feat[:, np.newaxis, :]
     test_loaded[mod] = (lr_feat, mask)
 
@@ -107,7 +99,7 @@ test_set = MultimodalDataset(test_data, test_mask, test_labels, augment=False)
 test_loader = DataLoader(test_set, batch_size=32, shuffle=False, collate_fn=collate_fn)
 
 # ==========================================
-# 定义模型包装器：将 3D 输入自动展平为 2D 以兼容 MLP
+# Define model wrapper
 # ==========================================
 class BaselineModelWrapper(BaselineLRMLPModel):
     def forward(self, x):
@@ -129,10 +121,10 @@ patience_counter = 0
 base_model_name = "baseline_lrmlp_model"
 best_model_filename = ""
 
-print("\n开始执行 Baseline(LR+MLP) 训练流程...")
+print("\nStarting the Baseline (LR+MLP) training process...")
 
 # ==========================================
-# 3. 训练与验证循环
+# 3. Training and validation loop
 # ==========================================
 for epoch in range(num_epochs):
     model.train()
@@ -222,27 +214,27 @@ for epoch in range(num_epochs):
             
         best_model_filename = f"{base_model_name}_epoch{epoch+1}_auc{best_val_auc:.4f}.pth"
         torch.save(model.state_dict(), os.path.join(OUTPUT_DIR, best_model_filename))
-        print(f"  新最佳Baseline模型已保存: {best_model_filename}")
+        print(f"  New best Baseline model saved: {best_model_filename}")
     else:
         patience_counter += 1
         
     if patience_counter >= patience:
-        print(f"\n[Early Stopping] 验证集 AUC 连续 {patience} 个 Epoch 未提升，停止训练。")
+        print(f"\n[Early Stopping] Validation AUC has not improved for {patience} consecutive epochs. Stopping training.")
         break
         
     print("-" * 60)
 
 # ==========================================
-# 4. 训练完成后评估
+# 4. Post-training evaluation
 # ==========================================
 if best_model_filename:
-    print(f"\n加载Baseline最优权重进行最终评估: {best_model_filename}")
+    print(f"\nLoading optimal Baseline weights for final evaluation: {best_model_filename}")
     model.load_state_dict(torch.load(os.path.join(OUTPUT_DIR, best_model_filename), map_location=device))
 
 train_eval_set = MultimodalDataset(train_data, train_mask, train_labels, augment=False)
 train_eval_loader = DataLoader(train_eval_set, batch_size=32, shuffle=False, collate_fn=collate_fn)
 
-print("\n====== Baseline 多模态最终评估（测试集，使用动态阈值） ======")
+print("\n====== Baseline Multimodal Final Evaluation (Test Set, using dynamic threshold) ======")
 multi_opt_thresh = find_optimal_threshold(model, "all", train_eval_loader, modalities, device)
 acc, pre, rec, f1, auc = final_metrics(model, test_loader, modalities, device, threshold=multi_opt_thresh)
 
