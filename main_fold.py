@@ -16,7 +16,7 @@ from data_utils import generate_xgb_features, transform_xgb_features, Multimodal
 from models import DeepMultimodalModel
 
 # ==========================================
-# 日志配置：同时输出到控制台和文件
+# Logging configuration: Output to both console and file
 # ==========================================
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 log_file = os.path.join(OUTPUT_DIR, "10fold_cv_training_log.txt")
@@ -37,7 +37,7 @@ def print_log(message):
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print_log(f"\nUsing device: {device}")
 
-# 通用数据加载函数
+# General data loading function
 def load_split_data(mod, split='train'):
     base_dir = f'split_data/{split}'
     neg_file = glob.glob(f'{base_dir}/negative/*{mod}*.npz')[0]
@@ -59,7 +59,7 @@ def load_split_data(mod, split='train'):
     return features, masks, labels
 
 # ==========================================
-# 第一步：加载所有数据并合并为全集
+# Step 1: Load all data and merge into a complete set
 # ==========================================
 full_data = {}
 full_masks = {}
@@ -80,10 +80,10 @@ for mod in modalities:
     if full_labels is None:
         full_labels = labels
     else:
-        assert np.all(full_labels == labels), f"{mod} 全集标签不一致"
+        assert np.all(full_labels == labels), f"{mod} complete set labels are inconsistent"
 
 # ==========================================
-# 第二步：设置 10 折交叉验证
+# Step 2: Set up 10-fold cross-validation
 # ==========================================
 n_splits = 10
 skf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=42)
@@ -102,7 +102,7 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(np.zeros(len(full_labels))
     
     xgb_models = {}
 
-    # 提取并预处理当前折数据
+    # Extract and preprocess current fold data
     for mod in modalities:
         X_train = full_data[mod][train_idx]
         M_train = full_masks[mod][train_idx]
@@ -127,7 +127,7 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(np.zeros(len(full_labels))
             train_loaded[mod] = (X_train, M_train)
             val_loaded[mod] = (X_val, M_val)
 
-    # 构建 DataLoader
+    # Build DataLoader
     train_dataset_data = {mod: train_loaded[mod][0] for mod in modalities}
     train_dataset_mask = {mod: train_loaded[mod][1] for mod in modalities}
     train_set = MultimodalDataset(train_dataset_data, train_dataset_mask, train_labels, augment=True)
@@ -138,14 +138,14 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(np.zeros(len(full_labels))
     val_set = MultimodalDataset(val_dataset_data, val_dataset_mask, val_labels, augment=False)
     val_loader = DataLoader(val_set, batch_size=32, shuffle=False, collate_fn=collate_fn)
 
-    # 初始化模型、损失函数和优化器
+    # Initialize model, loss function and optimizer
     model = DeepMultimodalModel().to(device)
     pos_weight = torch.tensor([(train_labels == 0).sum() / (train_labels == 1).sum()]).to(device)
     loss_fn = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
     optimizer = optim.AdamW(model.parameters(), lr=4e-6, weight_decay=4e-1)
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.7, patience=3, verbose=False)
 
-    # 训练参数设定
+    # Set training parameters
     num_epochs = 60
     best_model_path = os.path.join(OUTPUT_DIR, f"ecc_model_fold_{fold+1}_best.pth")
     epoch_metrics = []
@@ -153,10 +153,10 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(np.zeros(len(full_labels))
     print_log("\nStart Training...")
 
     # ==========================================
-    # 内嵌的自定义训练循环 (每轮监控 5 大指标)
+    # Embedded custom training loop (monitoring 5 major metrics per round)
     # ==========================================
     for epoch in range(num_epochs):
-        # --- 训练阶段 ---
+        # --- Training phase ---
         model.train()
         train_loss = 0.0
         train_preds, train_targets = [], []
@@ -184,7 +184,7 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(np.zeros(len(full_labels))
         train_loss /= len(train_loader.dataset)
         train_auc = roc_auc_score(train_targets, train_preds)
         
-        # 为当前 Epoch 的训练集计算动态最优阈值 (仅用于日志打印监控)
+        # Calculate dynamic optimal threshold for current Epoch's training set (only used for log printing monitoring)
         fpr_t, tpr_t, thresholds_t = roc_curve(train_targets, train_preds)
         epoch_thresh = thresholds_t[np.argmax(tpr_t - fpr_t)]
         
@@ -194,7 +194,7 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(np.zeros(len(full_labels))
         train_rec = recall_score(train_targets, train_bin, zero_division=0)
         train_f1 = f1_score(train_targets, train_bin, zero_division=0)
 
-        # --- 验证阶段 ---
+        # --- Validation phase ---
         model.eval()
         val_loss = 0.0
         val_preds, val_targets = [], []
@@ -218,14 +218,14 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(np.zeros(len(full_labels))
         val_loss /= len(val_loader.dataset)
         val_auc = roc_auc_score(val_targets, val_preds)
         
-        # 将当前 Epoch 训练集算出的阈值应用于验证集打印监控
+        # Apply the threshold calculated from the current Epoch training set to the validation set for print monitoring
         val_bin = (np.array(val_preds) >= epoch_thresh).astype(int)
         val_acc = accuracy_score(val_targets, val_bin)
         val_pre = precision_score(val_targets, val_bin, zero_division=0)
         val_rec = recall_score(val_targets, val_bin, zero_division=0)
         val_f1 = f1_score(val_targets, val_bin, zero_division=0)
 
-        # 记录每轮数据以寻找最佳稳定区间
+        # Record data for each round to find the most stable interval
         epoch_metrics.append({
             'epoch': epoch + 1,
             'val_loss': val_loss,
@@ -233,7 +233,7 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(np.zeros(len(full_labels))
             'state_dict': {k: v.cpu() for k, v in model.state_dict().items()}
         })
 
-        # 打印所有 5 大指标，同步写入 txt 日志文件
+        # Print all 5 major metrics, synchronously write to txt log file
         print_log(f"Epoch {epoch+1}/{num_epochs} (Epoch Thresh: {epoch_thresh:.4f})")
         print_log(f"  Train -> Loss: {train_loss:.4f} | AUC: {train_auc:.4f} | Acc: {train_acc:.4f} | Pre: {train_pre:.4f} | Rec: {train_rec:.4f} | F1: {train_f1:.4f}")
         print_log(f"  Val   -> Loss: {val_loss:.4f} | AUC: {val_auc:.4f} | Acc: {val_acc:.4f} | Pre: {val_pre:.4f} | Rec: {val_rec:.4f} | F1: {val_f1:.4f}")
@@ -241,7 +241,7 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(np.zeros(len(full_labels))
         
         scheduler.step(val_auc)
 
-    # 在最平稳的 Val Loss 区间中挑选最大的 AUC 模型作为本折最佳模型
+    # Select the model with the largest AUC from the most stable Val Loss interval as the best model for this fold
     window_size = 5
     best_state_dict = None
     max_target_auc = 0.0
@@ -268,20 +268,20 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(np.zeros(len(full_labels))
         best_epoch = best_metric['epoch']
 
     torch.save(best_state_dict, best_model_path)
-    print_log(f" 最佳模型已保存 (选自 Epoch {best_epoch}): {best_model_path}")
+    print_log(f" Best model saved (selected from Epoch {best_epoch}): {best_model_path}")
 
     # ==========================================
-    # 模型评估 (防数据泄露的动态阈值逻辑)
+    # Model evaluation (dynamic threshold logic to prevent data leakage)
     # ==========================================
-    print_log(f"\n====== 计算 Fold {fold + 1} 的无数据泄露动态阈值 ======")
+    print_log(f"\n====== Calculating dynamic threshold without data leakage for Fold {fold + 1} ======")
     model.load_state_dict(torch.load(best_model_path, map_location=device))
     model.eval()
     
-    # 1. 构造本折不带数据增强的纯净训练集 Loader
+    # 1. Construct a pure training set Loader without data augmentation for this fold
     train_eval_set = MultimodalDataset(train_dataset_data, train_dataset_mask, train_labels, augment=False)
     train_eval_loader = DataLoader(train_eval_set, batch_size=32, shuffle=False, collate_fn=collate_fn)
 
-    # 2. 在纯净训练集上收集概率分布并计算最佳阈值
+    # 2. Collect probability distribution on the pure training set and calculate the best threshold
     train_eval_probs, train_eval_labels = [], []
     with torch.no_grad():
         for batch in train_eval_loader:
@@ -298,9 +298,9 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(np.zeros(len(full_labels))
     fpr, tpr, thresholds = roc_curve(train_eval_labels, train_eval_probs)
     best_idx = np.argmax(tpr - fpr)
     fold_opt_thresh = thresholds[best_idx]
-    print_log(f"本折训练集推导最佳阈值: {fold_opt_thresh:.4f}")
+    print_log(f"Best threshold derived from current fold training set: {fold_opt_thresh:.4f}")
 
-    # 3. 将该最佳阈值严格应用于验证集进行最终打分
+    # 3. Strictly apply this best threshold to the validation set for final scoring
     final_preds, final_labels = [], []
     with torch.no_grad():
         for batch in val_loader:
@@ -319,14 +319,14 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(np.zeros(len(full_labels))
     final_labels = np.array(final_labels)
     
     auc = roc_auc_score(final_labels, final_preds)
-    # 替换硬编码的 0.5，使用动态阈值
+    # Replace hardcoded 0.5, use dynamic threshold
     preds_binary = (final_preds >= fold_opt_thresh).astype(int)
     acc = accuracy_score(final_labels, preds_binary)
     pre = precision_score(final_labels, preds_binary, zero_division=0)
     rec = recall_score(final_labels, preds_binary, zero_division=0)
     f1 = f1_score(final_labels, preds_binary, zero_division=0)
 
-    print_log(f"Fold {fold+1} 最终成绩 -> AUC: {auc:.4f}, ACC: {acc:.4f}, PRE: {pre:.4f}, REC: {rec:.4f}, F1: {f1:.4f}")
+    print_log(f"Fold {fold+1} final score -> AUC: {auc:.4f}, ACC: {acc:.4f}, PRE: {pre:.4f}, REC: {rec:.4f}, F1: {f1:.4f}")
     
     cv_metrics['auc'].append(auc)
     cv_metrics['acc'].append(acc)
@@ -336,7 +336,7 @@ for fold, (train_idx, val_idx) in enumerate(skf.split(np.zeros(len(full_labels))
     cv_metrics['thresholds'].append(fold_opt_thresh)
 
 # ==========================================
-# 第三步：输出 10 折交叉验证的最终统计结果
+# Step 3: Output final statistical results of 10-fold cross-validation
 # ==========================================
 print_log("\n" + "="*40)
 print_log("10-Fold Cross Validation Final Results:")
