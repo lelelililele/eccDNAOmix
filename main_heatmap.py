@@ -16,7 +16,7 @@ from feature_extract import FeatureExtractor
 from umap_vis import visualize_umap
 import seaborn as sns
 from scipy.stats import spearmanr
-from sklearn.manifold import MDS  # 新增导入
+from sklearn.manifold import MDS 
 import matplotlib.pyplot as plt
 from scipy.stats import spearmanr
 
@@ -25,7 +25,7 @@ from sklearn.decomposition import PCA
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"\nUsing device: {device}")
 
-# 通用数据加载函数
+# General data loading function
 def load_split_data(mod, split='train'):
     base_dir = f'split_data/{split}'
     neg_file = glob.glob(f'{base_dir}/negative/*{mod}*.npz')[0]
@@ -46,7 +46,7 @@ def load_split_data(mod, split='train'):
 
     return features, masks, labels
 
-# 加载训练集
+# Load training set
 train_loaded = {}
 train_labels = None
 for mod in modalities:
@@ -58,9 +58,9 @@ for mod in modalities:
     if train_labels is None:
         train_labels = labels
     else:
-        assert np.all(train_labels == labels), f"{mod} train 标签不一致"
+        assert np.all(train_labels == labels), f"{mod} train labels are inconsistent"
 
-#  训练集 XGBoost 特征处理
+# Training set XGBoost feature processing
 xgb_models = {}
 for mod in xgb_modalities:
     X = train_loaded[mod][0]
@@ -75,7 +75,7 @@ train_mask = {mod: train_loaded[mod][1] for mod in modalities}
 train_set = MultimodalDataset(train_data, train_mask, train_labels, augment=True)
 train_loader = DataLoader(train_set, batch_size=32, shuffle=True, collate_fn=collate_fn)
 
-#  加载测试集
+# Load test set
 test_loaded = {}
 test_labels = None
 for mod in modalities:
@@ -87,9 +87,9 @@ for mod in modalities:
     if test_labels is None:
         test_labels = labels
     else:
-        assert np.all(test_labels == labels), f"{mod} test 标签不一致"
+        assert np.all(test_labels == labels), f"{mod} test labels are inconsistent"
 
-# 测试集 XGBoost 特征处理
+# Test set XGBoost feature processing
 for mod in xgb_modalities:
     X = test_loaded[mod][0]
     mask = test_loaded[mod][1]
@@ -102,14 +102,14 @@ test_mask = {mod: test_loaded[mod][1] for mod in modalities}
 test_set = MultimodalDataset(test_data, test_mask, test_labels, augment=False)
 test_loader = DataLoader(test_set, batch_size=32, shuffle=False, collate_fn=collate_fn)
 
-# 初始化模型
+# Initialize model
 model = DeepMultimodalModel().to(device)
 #pos_weight = torch.tensor([(train_labels == 0).sum() / (train_labels == 1).sum()]).to(device)
 #loss_fn = nn.BCEWithLogitsLoss(pos_weight=pos_weight)
 #optimizer = optim.AdamW(model.parameters(),lr=4e-6, weight_decay=4e-1)
 #scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='max', factor=0.7, patience=3, verbose=True)
 
-#  模型训练
+# Model training
 #history = train_model(
 #    model=model,
 #    device=device,
@@ -126,25 +126,25 @@ model = DeepMultimodalModel().to(device)
 model_path = os.path.join(OUTPUT_DIR, "ecc_model_epoch37_auc0.8225.pth")
 if os.path.exists(model_path):
     model.load_state_dict(torch.load(model_path))
-    print(f"\n✅ 已加载最佳模型: {model_path}")
+    print(f"\n✅ Best model loaded: {model_path}")
 else:
-    print(f"\n❌ 模型文件不存在: {model_path}")
-    # 如果没有模型文件，可以选择退出或继续训练
+    print(f"\n❌ Model file does not exist: {model_path}")
+    # If no model file, choose to exit or continue training
     exit()
 
 
 def analyze_modality_correlation(model, data_loader, device, modalities, n_components=3):
     """
-    改进版模态相关性分析函数
-    主要改进：
-    1. 使用PCA降维保留主要变异方向
-    2. 自动处理不同模态的维度差异
-    3. 添加特征分布对比可视化
+    Improved modality correlation analysis function
+    Main improvements:
+    1. Use PCA to retain the primary directions of variation
+    2. Automatically handle dimension differences between modalities
+    3. Add feature distribution comparison visualization
     """
     model.eval()
     modality_features = {mod: [] for mod in modalities}
     
-    # 1. 特征提取阶段
+    # 1. Feature extraction phase
     with torch.no_grad():
         for batch in data_loader:
             inputs = {k: v.to(device) for k, v in batch['data'].items()}
@@ -163,54 +163,54 @@ def analyze_modality_correlation(model, data_loader, device, modalities, n_compo
             for mod in modalities:
                 modality_features[mod].append(features[mod])
     
-    # 2. 特征预处理
+    # 2. Feature preprocessing
     pca_features = {}
     explained_variances = {}
     
     for mod in modalities:
         if len(modality_features[mod]) == 0:
-            raise ValueError(f"模态 {mod} 未提取到任何特征")
+            raise ValueError(f"No features extracted for modality {mod}")
         
-        # 拼接所有batch的特征
+        # Concatenate features from all batches
         raw_features = np.concatenate(modality_features[mod], axis=0)  # [N, D]
         
-        # 标准化
+        # Standardization
         scaler = StandardScaler()
         scaled_features = scaler.fit_transform(raw_features)
         
-        # 动态设置PCA维度（不超过特征原始维度）
+        # Dynamically set PCA dimensions (not exceeding the original dimension of the feature)
         actual_components = min(n_components, scaled_features.shape[1])
         pca = PCA(n_components=actual_components)
         pca_features[mod] = pca.fit_transform(scaled_features)  # [N, n_components]
         explained_variances[mod] = pca.explained_variance_ratio_
         
-        print(f"模态 {mod}: 原始维度 {raw_features.shape[1]} -> 降维至 {actual_components} (累计解释方差: {explained_variances[mod].sum():.2f})")
+        print(f"Modality {mod}: Original dim {raw_features.shape[1]} -> reduced to {actual_components} (Cumulative explained variance: {explained_variances[mod].sum():.2f})")
 
-    # 3. 多维度相关性计算
+    # 3. Multidimensional correlation calculation
     corr_matrix = np.zeros((len(modalities), len(modalities)))
     for i, mod1 in enumerate(modalities):
         for j, mod2 in enumerate(modalities):
-            # 对每个PCA主成分分别计算相关性后取平均
+            # Calculate correlation for each PCA principal component separately then average
             corr_values = []
             min_dims = min(pca_features[mod1].shape[1], pca_features[mod2].shape[1])
             
             for dim in range(min_dims):
                 try:
                     corr = spearmanr(pca_features[mod1][:, dim], 
-                                    pca_features[mod2][:, dim])[0]
+                                     pca_features[mod2][:, dim])[0]
                     corr_values.append(corr)
                 except:
                     continue
             
-            # 使用加权平均（按解释方差加权）
+            # Weighted average (weighted by explained variance)
             weights = (explained_variances[mod1][:min_dims] + explained_variances[mod2][:min_dims])/2
             weighted_corr = np.average(np.abs(corr_values), weights=weights)
             corr_matrix[i,j] = weighted_corr
 
-    # 4. 创建可视化面板
+    # 4. Create visualization panel
     plt.figure(figsize=(18, 12))
     
-    # 4.1 相关性热力图
+    # 4.1 Correlation heatmap
     plt.subplot(2, 2, 1)
     sns.heatmap(
         corr_matrix, 
@@ -223,18 +223,18 @@ def analyze_modality_correlation(model, data_loader, device, modalities, n_compo
         vmin=-1,
         vmax=1
     )
-    plt.title(f"模态间PCA加权相关性 (n_components={n_components})")
+    plt.title(f"PCA-weighted inter-modality correlation (n_components={n_components})")
     
-    # 4.2 主成分解释方差
+    # 4.2 Principal component explained variance
     plt.subplot(2, 2, 2)
     for mod in modalities:
         plt.plot(np.cumsum(explained_variances[mod]), 'o-', label=mod)
     plt.xlabel("PCA Components")
     plt.ylabel("Cumulative Explained Variance")
     plt.legend()
-    plt.title("各模态PCA解释方差")
+    plt.title("PCA explained variance per modality")
     
-    # 4.3 特征分布对比（第一主成分）
+    # 4.3 Feature distribution comparison (first principal component)
     plt.subplot(2, 2, 3)
     for mod in modalities:
         sns.kdeplot(pca_features[mod][:, 0], label=f"{mod} (PC1)")
@@ -242,9 +242,9 @@ def analyze_modality_correlation(model, data_loader, device, modalities, n_compo
     plt.xlabel("Feature Value")
     plt.ylabel("Density")
     plt.legend()
-    plt.title("各模态第一主成分分布")
+    plt.title("Distribution of the first principal component for each modality")
     
-    # 4.4 特征分布对比（所有主成分箱线图）
+    # 4.4 Feature distribution comparison (box plot for all principal components)
     plt.subplot(2, 2, 4)
     all_pc_data = []
     for mod in modalities:
@@ -257,7 +257,7 @@ def analyze_modality_correlation(model, data_loader, device, modalities, n_compo
     import pandas as pd
     df_pc = pd.DataFrame(all_pc_data)
     sns.boxplot(x="Modality", y="Value", hue="PC", data=df_pc)
-    plt.title("各主成分值分布")
+    plt.title("Distribution of all principal component values")
     plt.xticks(rotation=45)
     
     plt.tight_layout()
@@ -269,21 +269,21 @@ def analyze_modality_correlation(model, data_loader, device, modalities, n_compo
         "pca_features": pca_features,
         "explained_variances": explained_variances
     }
-# 调用分析函数（假设modalities已定义）
+# Call analysis function (assuming modalities is defined)
 analysis_results = analyze_modality_correlation(
     model, 
     train_loader, 
     device, 
-    modalities,  # 例如: ['seq', 'snp', 'expression']
-    n_components=3  # 可根据数据维度调整
+    modalities,  # E.g.: ['seq', 'snp', 'expression']
+    n_components=3  # Adjustable based on data dimensions
 )
 
-# 保存所有结果（推荐方式）
+# Save all results (recommended approach)
 import pickle
 with open(os.path.join(OUTPUT_DIR, "modality_analysis_results.pkl"), 'wb') as f:
     pickle.dump(analysis_results, f)
 
-# 或者分别保存各组件（兼容旧代码）
+# Or save each component separately (compatible with old code)
 np.save(os.path.join(OUTPUT_DIR, "modality_correlation_matrix.npy"), 
         analysis_results['correlation_matrix'])
 np.save(os.path.join(OUTPUT_DIR, "pca_features.npy"), 
@@ -291,7 +291,6 @@ np.save(os.path.join(OUTPUT_DIR, "pca_features.npy"),
 np.save(os.path.join(OUTPUT_DIR, "explained_variances.npy"), 
         analysis_results['explained_variances'])
 
-# 如果只需要相关性矩阵（保持与旧代码兼容）
+# If only the correlation matrix is needed (compatible with old code)
 modality_corr = analysis_results['correlation_matrix']
 np.save(os.path.join(OUTPUT_DIR, "modality_correlation.npy"), modality_corr)
-
