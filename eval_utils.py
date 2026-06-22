@@ -6,7 +6,7 @@ from config import ROC_FIGURE_PATH
 
 def find_optimal_threshold(model, modality_name, train_loader, modalities, device):
     """
-    新增函数：在训练集上寻找无数据泄露的最佳阈值 (Youden's J statistic)
+    New function: Find the optimal threshold on the training set to prevent data leakage (Youden's J statistic)
     """
     model.eval()
     all_probs, all_labels = [], []
@@ -15,7 +15,7 @@ def find_optimal_threshold(model, modality_name, train_loader, modalities, devic
         for batch in train_loader:
             labels = batch['labels'].cpu().numpy()
 
-            # 构建 mask：如果是单模态，仅激活指定模态；如果是 "all"，激活全部
+            # Build mask: Activate only the specified modality if single, or all if "all"
             if modality_name != "all":
                 mod_mask = {
                     mod: (batch['mask'][mod] if mod == modality_name else torch.zeros_like(batch['mask'][mod]))
@@ -37,7 +37,7 @@ def find_optimal_threshold(model, modality_name, train_loader, modalities, devic
             all_probs.extend(probs)
             all_labels.extend(labels)
 
-    # 计算 Youden's J 统计量最大化时的阈值
+    # Calculate the threshold that maximizes Youden's J statistic
     fpr, tpr, thresholds = roc_curve(all_labels, all_probs)
     j_scores = tpr - fpr
     best_idx = np.argmax(j_scores)
@@ -46,7 +46,7 @@ def find_optimal_threshold(model, modality_name, train_loader, modalities, devic
     return best_threshold
 
 def evaluate_modality(model, modality_name, data_loader, modalities, device, threshold=0.5):
-    """评估单个模态在激活时的独立全指标性能（支持自定义阈值）"""
+    """Evaluate the independent comprehensive performance of a single modality when activated (supports custom thresholds)"""
     model.eval()
     all_probs, all_labels = [], []
 
@@ -54,7 +54,7 @@ def evaluate_modality(model, modality_name, data_loader, modalities, device, thr
         for batch in data_loader:
             labels = batch['labels'].cpu().numpy()
 
-            # 构建 mask：仅激活指定模态，其余为零
+            # Build mask: Activate only the specified modality, zero out the rest
             mod_mask = {
                 mod: (batch['mask'][mod] if mod == modality_name else torch.zeros_like(batch['mask'][mod]))
                 for mod in modalities
@@ -76,7 +76,7 @@ def evaluate_modality(model, modality_name, data_loader, modalities, device, thr
     all_probs = np.array(all_probs)
     all_labels = np.array(all_labels)
     
-    # 使用传入的最佳阈值
+    # Use the provided optimal threshold
     all_preds = (all_probs > threshold).astype(int)
 
     auc = roc_auc_score(all_labels, all_probs)
@@ -92,7 +92,7 @@ def evaluate_modality(model, modality_name, data_loader, modalities, device, thr
 
 
 def final_metrics(model, data_loader, modalities, device, threshold=0.5):
-    """多模态最终评估（支持自定义阈值）"""
+    """Final multimodal evaluation (supports custom thresholds)"""
     model.eval()
     all_preds, all_probs, all_labels = [], [], []
 
@@ -109,7 +109,7 @@ def final_metrics(model, data_loader, modalities, device, threshold=0.5):
                 outputs = outputs.unsqueeze(0)
             probs = torch.sigmoid(outputs).cpu().numpy()
             
-            # 使用传入的最佳阈值
+            # Use the provided optimal threshold
             preds = (probs > threshold).astype(int)
 
             all_probs.extend(probs)
