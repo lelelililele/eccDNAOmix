@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import math
 
-# Gated 融合模块
+# Gated fusion module
 class GatedFusion(nn.Module):
     def __init__(self, input_dims):
         super().__init__()
@@ -23,7 +23,7 @@ class GatedFusion(nn.Module):
             gated_features.append(gated)
         return torch.cat(gated_features, dim=1)
 
-# 通道注意力模块
+# Channel attention module
 class ChannelAttention(nn.Module):
     def __init__(self, in_channels, reduction=8):
         super().__init__()
@@ -42,7 +42,7 @@ class ChannelAttention(nn.Module):
         out = avg_out + max_out
         return self.sigmoid(out).unsqueeze(-1) * x
 
-# 残差卷积块
+# Residual convolutional block
 class ResBlock(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size=15):
         super().__init__()
@@ -66,7 +66,7 @@ class ResBlock(nn.Module):
         x = self.ca(x)
         return F.leaky_relu(x + residual, 0.1)
 
-# 位置编码
+# Positional encoding
 class PositionalEncoding(nn.Module):
     def __init__(self, d_model, dropout=0.1, max_len=5000):
         super().__init__()
@@ -82,7 +82,7 @@ class PositionalEncoding(nn.Module):
         x = x + self.pe[:x.size(1)].permute(1, 0, 2)
         return self.dropout(x)
 
-# 各模态子网络
+# Subnetworks for each modality
 class SparseModalityNet(nn.Module):
     def __init__(self, in_channels, feature_dim=32, is_xgb=False):
         super().__init__()
@@ -118,12 +118,12 @@ class SparseModalityNet(nn.Module):
             return self.fc(x)
         else:
             x = self.feature_extractor(x)
-            x = x.permute(0, 2, 1) # 形状变为 (batch, seq_len, 32)
+            x = x.permute(0, 2, 1) # Reshape to (batch, seq_len, 32)
             x = self.pos_encoder(x)
             x = self.transformer(x)
             return x.mean(dim=1) 
 
-# 主模型
+# Main model
 class DeepMultimodalModel(nn.Module):
     def __init__(self):
         super().__init__()
