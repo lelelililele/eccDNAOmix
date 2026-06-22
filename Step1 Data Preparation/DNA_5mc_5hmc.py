@@ -10,16 +10,16 @@ def parse_arguments():
     return parser.parse_args()  
 
 def main():  
-    # 解析命令行参数  
+    # Parse command-line arguments  
     args = parse_arguments()  
     file1 = args.file1  
     file2 = args.file2  
     output_file = args.output  
 
-    # 读取第二个BED文件，构建positions字典  
+    # Read the second BED file to build the positions dictionary  
     positions = {}  
 
-    # 判断文件是否是压缩文件  
+    # Check if the file is compressed  
     if file2.endswith('.gz'):  
         open_func = gzip.open  
     else:  
@@ -32,7 +32,7 @@ def main():
                 continue  
             parts = line.split()  
             if len(parts) < 11:  
-                continue  # 跳过格式错误的行  
+                continue  # Skip malformed lines  
             pos = int(parts[1])  
             type_ = parts[3]  
             value = float(parts[10])  
@@ -45,7 +45,7 @@ def main():
             elif type_ == 'm':  
                 positions[pos]['m'] = value  
 
-    # 处理第一个文件，生成编码数组  
+    # Process the first file to generate encoding arrays  
     arrays = []  
 
     with open(file1, 'r') as f:  
@@ -55,7 +55,7 @@ def main():
                 continue  
             parts = line.split()  
             if len(parts) < 3:  
-                continue  # 跳过格式错误的行  
+                continue  # Skip malformed lines  
             chrom = parts[0]  
             start = int(parts[1])  
             end = int(parts[2])  
@@ -67,7 +67,7 @@ def main():
                 current_array.append([h, m])  
             arrays.append(np.array(current_array))  
 
-    # 保存到NPZ文件  
+    # Save to NPZ file  
     output = {}  
     for idx, arr in enumerate(arrays):  
         output[f'array_{idx}'] = arr  
@@ -75,4 +75,4 @@ def main():
     np.savez_compressed(output_file, **output)  
 
 if __name__ == '__main__':  
-    main()  
+    main()
