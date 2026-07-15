@@ -187,7 +187,7 @@ The input directory should contain ".npz" feature files, such as:
 
 These files can be generated using the scripts in the "Step1 Data Preparation" and "Step2 Data Combination" folders.  
 
-Please Cite：  
+## Please Cite：  
 Zhang, L., Cui, J., Sun, T. et al. AI-driven multi-omics deciphering of extrachromosomal circular DNA rescues hidden targets in colorectal cancer. Cell Commun Signal (2026). https://doi.org/10.1186/s12964-026-03063-z
         
         
